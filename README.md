@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/assets/logo.png" alt="CapyShield logo" width="110">
+
 # CapyShield
 
 **A deterministic, zero-trust egress guard and local VEX/reachability engine.**
