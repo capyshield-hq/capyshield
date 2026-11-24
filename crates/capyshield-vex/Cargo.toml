@@ -1,0 +1,16 @@
+[package]
+name = "capyshield-vex"
+description = "Trivy/Grype ingestion, local VEX rules and OpenVEX v0.2 output"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+capyshield-reach.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+sha2.workspace = true
+hex.workspace = true

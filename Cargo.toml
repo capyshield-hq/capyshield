@@ -1,0 +1,49 @@
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+authors = ["Agus Makmun <summon.agus@gmail.com>"]
+edition = "2024"
+license = "Apache-2.0"
+repository = "https://github.com/capyshield/capyshield"
+homepage = "https://capyshield.com"
+
+[workspace.dependencies]
+capyshield-policy = { path = "crates/capyshield-policy", version = "0.1.0" }
+capyshield-scanner = { path = "crates/capyshield-scanner", version = "0.1.0" }
+capyshield-proxy = { path = "crates/capyshield-proxy", version = "0.1.0" }
+capyshield-reach = { path = "crates/capyshield-reach", version = "0.1.0" }
+capyshield-vex = { path = "crates/capyshield-vex", version = "0.1.0" }
+capyshield-sync = { path = "crates/capyshield-sync", version = "0.1.0" }
+
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "io-util", "process", "signal", "time", "sync"] }
+hyper = { version = "1", features = ["http1", "server", "client"] }
+hyper-util = { version = "0.1", features = ["tokio"] }
+http-body-util = "0.1"
+bytes = "1"
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
+tokio-rustls = { version = "0.26", default-features = false, features = ["ring", "tls12", "logging"] }
+rcgen = { version = "0.14", default-features = false, features = ["crypto", "pem", "ring", "x509-parser"] }
+webpki-roots = "1"
+aho-corasick = "1"
+regex = "1"
+sha2 = "0.10"
+base64 = "0.22"
+hex = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+toml = "0.8"
+globset = "0.4"
+time = { version = "0.3", features = ["formatting"] }
+clap = { version = "4", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+colored = "2"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
