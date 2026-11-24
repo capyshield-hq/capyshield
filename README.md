@@ -41,11 +41,13 @@ capyshield: 2 connection(s) to 1 host(s)
 
 - [Installation](#installation)
 - [Quickstart](#quickstart)
+- [Command reference](#command-reference)
 - [Egress guard](#egress-guard)
 - [VEX & reachability](#vex--reachability)
 - [Configuration](#configuration)
 - [Integrations](#integrations)
 - [Exit codes](#exit-codes)
+- [Environment variables](#environment-variables)
 - [Privacy](#privacy)
 - [Performance](#performance)
 - [Security model & limitations](#security-model--limitations)
@@ -64,7 +66,7 @@ CapyShield ships as one self-contained binary for **Linux** (x86_64, arm64; glib
 | **npm** (run without installing) | `npx capyshield watch -- npm install` |
 | **npm** (install) | `npm install -g capyshield` or `npm install -D capyshield` |
 | **Cargo** | `cargo install capyshield --locked` |
-| **Homebrew** | `brew install capyshield-hq/tap/capyshield` |
+| **Homebrew** (coming soon) | `brew install capyshield-hq/tap/capyshield` |
 | **Docker** | `docker run --rm -v "$PWD:/src" -w /src ghcr.io/capyshield-hq/capyshield:latest --help` |
 | **Prebuilt binaries** | [GitHub Releases](https://github.com/capyshield-hq/capyshield/releases), with a SHA-256 checksum and SLSA build provenance for every archive |
 | **GitHub Actions** | `uses: capyshield-hq/capyshield/action@v1` |
@@ -97,6 +99,20 @@ trivy fs --vex release.openvex.json .
 ```
 
 For a richer starting point, `capyshield init` writes a documented `capyshield.yaml`, a `.capyshield/vex-rules.yaml`, and a local root CA for HTTPS inspection.
+
+## Command reference
+
+Run `capyshield <command> --help` for the full text. The wrapped command always follows `--`.
+
+| Command | Purpose | Options |
+|---|---|---|
+| `watch -- <cmd>` | Zero-config egress audit. Forces `mode: audit` and nothing is blocked. | `--config <file>` optional policy · `--tls sni\|mitm` · `--report <events.json>` · `--emit-policy <file>` writes an enforce-mode policy allowing exactly the hosts seen |
+| `guard -- <cmd>` | Enforce `capyshield.yaml` (default `./capyshield.yaml`; without one, enforces the built-in secret, ENV and PII checks). Exits 2 on blocked egress. | `--config <file>` · `--mode audit\|enforce\|enforce_fail_open\|enforce_fail_closed` · `--fail-mode fail_open\|fail_closed` · `--tls sni\|mitm` · `--agent-id <id>` · `--report <events.json>` |
+| `vex --input <report.json>` | Triage a Trivy/Grype report by reachability and write OpenVEX v0.2.0 (to stdout unless `--output`). | `--scanner trivy\|grype` (auto-detected) · `--repo <dir>` (default `.`) · `--output <file>` · `--summary <file.md>` · `--fail-on high,critical` · `--redact-paths` · `--sync` · `--dry-run` · `--config <file>` · `--author <name>` (default `capyshield`) |
+| `init` | Write `capyshield.yaml`, `.capyshield/vex-rules.yaml`, and a local root CA in `~/.capyshield/` (key mode `0600`). Existing files are kept. | `--force` overwrites `capyshield.yaml` · `--no-ca` skips the CA |
+| `presets` | List the built-in host presets for `egress.allow_presets`. | none |
+
+CLI flags override the config file: `--mode`, `--fail-mode` and `--tls` win over `mode`, `fail_mode` and `egress.tls_inspection`.
 
 ## Egress guard
 
@@ -298,6 +314,20 @@ Complete examples are in [`examples/`](examples/).
 | `2` | Egress violation blocked (`secret_leak`, `disallowed_host`, `payload_limit`, `pii_detected`) |
 | `3` | `vex --fail-on` matched an `affected` finding at one of the listed severities |
 
+## Environment variables
+
+None are required. CapyShield runs fully offline by default.
+
+| Variable | Used by | Purpose |
+|---|---|---|
+| `CAPYSHIELD_TOKEN` (or `CAPYSHIELD_API_KEY`) | `vex --sync` | Authenticates to CapyShield Cloud. Sync is never attempted without `--sync`. |
+| `CAPYSHIELD_API_URL` | `vex --sync` | Overrides the API endpoint (default `https://api.capyshield.com`). |
+| `CAPYSHIELD_LOG` | all commands | Log filter for diagnostics on stderr, e.g. `debug` or `capyshield_proxy=debug` (default `warn`). |
+| `SOURCE_DATE_EPOCH` | `vex` | Fixes the OpenVEX timestamp for byte-for-byte reproducible output. |
+| `SSL_CERT_FILE` | `guard`/`watch` with `mitm` | If set, used as the base trust bundle that the local CA is appended to for the wrapped process. |
+
+`watch` and `guard` also *set* variables for the wrapped process: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY` (and their lowercase forms) and `NO_PROXY`, plus the CA variables listed under [TLS modes](#tls-modes) in `mitm` mode.
+
 ## Privacy
 
 - **Zero source-code exfiltration.** Import analysis runs locally and keeps only package names and file counts.
@@ -315,7 +345,7 @@ Measured on an Apple Silicon laptop with a release build on macOS arm64:
 | Memory while proxying 4,000 keep-alive requests | 12.5 MB RSS |
 | Full-inspection overhead, empty body | +0.11 ms p95 |
 | Full-inspection overhead, 64 KB body | +1.47 ms p95 |
-| Binary size | 6.9 MB |
+| Binary size | 6.6 MB |
 
 Full inspection means the host policy check plus pattern, ENV, PII and entropy scans of the URL, headers and whole body. MITM mode adds TLS termination on top. SNI mode only parses the ClientHello and splices bytes.
 

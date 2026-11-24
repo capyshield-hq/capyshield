@@ -71,7 +71,8 @@ The same native binary is distributed through several channels. All of them are 
 
 | Channel | Source |
 |---|---|
-| GitHub Releases, Homebrew, Docker | `Cargo.toml`, `Dockerfile` |
+| GitHub Releases, Docker (GHCR, optional Docker Hub) | `Cargo.toml`, `Dockerfile` |
+| Homebrew | Not automated yet: needs the `capyshield-hq/homebrew-tap` repo and a formula-bump step |
 | crates.io | workspace crates (`cargo publish --workspace`) |
 | PyPI (`uvx`, `pip`) | `pyproject.toml` (maturin `bindings = "bin"`) |
 | npm (`npx`) | `npm/`. Test it locally with `node npm/publish.mjs <version> <dir-with-release-tarballs>`, which packs `.tgz` files into `npm/dist/`. |
