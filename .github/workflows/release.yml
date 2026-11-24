@@ -2,11 +2,25 @@ name: release
 on:
   push:
     tags: ["v*"]
+  # Dry run: builds every artifact but publishes nothing (all publish steps require a v* tag).
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag must match the Cargo.toml version (crates.io and PyPI publish that version)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          v=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
+          [ "v$v" = "$GITHUB_REF_NAME" ] || { echo "::error::tag $GITHUB_REF_NAME does not match Cargo.toml version $v"; exit 1; }
+
   build:
+    needs: check-version
     strategy:
+      fail-fast: false
       matrix:
         include:
           - { target: x86_64-unknown-linux-musl, os: ubuntu-latest, cross: true }
@@ -52,6 +66,7 @@ jobs:
 
   release:
     needs: [build, universal-macos]
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -71,6 +86,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
   docker:
+    needs: check-version
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -110,7 +126,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: ${{ startsWith(github.ref, 'refs/tags/v') }}
           provenance: mode=max
           tags: ${{ steps.tags.outputs.list }}
 
@@ -129,11 +145,13 @@ jobs:
 
   # PyPI: the same native binary as a wheel (`uvx capyshield`, `uv tool install`, `pipx`, `pip`).
   pypi-wheels:
+    needs: check-version
     strategy:
+      fail-fast: false
       matrix:
         include:
           - { os: ubuntu-latest, target: x86_64, manylinux: auto }
-          - { os: ubuntu-latest, target: aarch64, manylinux: auto }
+          - { os: ubuntu-latest, target: aarch64, manylinux: "2_28" }
           - { os: ubuntu-latest, target: x86_64-unknown-linux-musl, manylinux: musllinux_1_2 }
           - { os: ubuntu-latest, target: aarch64-unknown-linux-musl, manylinux: musllinux_1_2 }
           - { os: macos-latest, target: universal2-apple-darwin, manylinux: auto }

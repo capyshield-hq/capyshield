@@ -12,6 +12,7 @@ Stop secrets from leaving your build, CI or AI agent, and cut CVE noise down to 
 [![Release](https://img.shields.io/github/v/release/capyshield-hq/capyshield)](https://github.com/capyshield-hq/capyshield/releases)
 [![crates.io](https://img.shields.io/crates/v/capyshield)](https://crates.io/crates/capyshield)
 [![PyPI](https://img.shields.io/pypi/v/capyshield)](https://pypi.org/project/capyshield/)
+[![npm](https://img.shields.io/npm/v/capyshield)](https://www.npmjs.com/package/capyshield)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
 [Install](#installation) · [Quickstart](#quickstart) · [Egress guard](#egress-guard) · [VEX & reachability](#vex--reachability) · [Configuration](#configuration) · [CI & agents](#integrations)
