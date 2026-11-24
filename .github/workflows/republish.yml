@@ -21,8 +21,8 @@ jobs:
     if: inputs.registry == 'npm'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
@@ -44,10 +44,10 @@ jobs:
     steps:
       # Publish the exact source of the release tag, with the publish script from main
       # (older tags predate it).
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.tag }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: _main
           sparse-checkout: .github/scripts
