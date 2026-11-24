@@ -1,0 +1,200 @@
+name: release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - { target: x86_64-unknown-linux-musl, os: ubuntu-latest, cross: true }
+          - { target: aarch64-unknown-linux-musl, os: ubuntu-latest, cross: true }
+          - { target: aarch64-apple-darwin, os: macos-latest }
+          - { target: x86_64-apple-darwin, os: macos-latest }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - if: matrix.cross
+        run: cargo install cross --locked
+      - run: ${{ matrix.cross && 'cross' || 'cargo' }} build --release --locked -p capyshield --target ${{ matrix.target }}
+      - name: Package
+        working-directory: target/${{ matrix.target }}/release
+        run: |
+          tar czf capyshield-${{ matrix.target }}.tar.gz capyshield
+          shasum -a 256 capyshield-${{ matrix.target }}.tar.gz > capyshield-${{ matrix.target }}.tar.gz.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/capyshield-*
+
+  universal-macos:
+    needs: build
+    runs-on: macos-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: "*-apple-darwin"
+          merge-multiple: true
+      - run: |
+          for t in aarch64-apple-darwin x86_64-apple-darwin; do mkdir $t && tar xzf capyshield-$t.tar.gz -C $t; done
+          lipo -create -output capyshield aarch64-apple-darwin/capyshield x86_64-apple-darwin/capyshield
+          tar czf capyshield-universal-apple-darwin.tar.gz capyshield
+          shasum -a 256 capyshield-universal-apple-darwin.tar.gz > capyshield-universal-apple-darwin.tar.gz.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: universal-apple-darwin
+          path: capyshield-universal-apple-darwin.tar.gz*
+
+  release:
+    needs: [build, universal-macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: SLSA build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/*.tar.gz
+      - run: gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  docker:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    env:
+      # Optional Docker Hub mirror: pushed only when these are configured.
+      DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - if: env.DOCKERHUB_TOKEN != ''
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+      - id: tags
+        run: |
+          {
+            echo "list<<EOF"
+            for image in ghcr.io/capyshield/capyshield ${DOCKERHUB_TOKEN:+docker.io/capyshield/capyshield}; do
+              echo "$image:$GITHUB_REF_NAME"
+              echo "$image:latest"
+            done
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64,linux/arm64
+          push: true
+          provenance: mode=max
+          tags: ${{ steps.tags.outputs.list }}
+
+  crates-io:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Publish all workspace crates
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          if [ -z "$CARGO_REGISTRY_TOKEN" ]; then echo "CARGO_REGISTRY_TOKEN not set, skipping"; exit 0; fi
+          cargo publish --workspace --locked
+
+  # PyPI: the same native binary as a wheel (`uvx capyshield`, `uv tool install`, `pipx`, `pip`).
+  pypi-wheels:
+    strategy:
+      matrix:
+        include:
+          - { os: ubuntu-latest, target: x86_64, manylinux: auto }
+          - { os: ubuntu-latest, target: aarch64, manylinux: auto }
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-musl, manylinux: musllinux_1_2 }
+          - { os: ubuntu-latest, target: aarch64-unknown-linux-musl, manylinux: musllinux_1_2 }
+          - { os: macos-latest, target: universal2-apple-darwin, manylinux: auto }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          manylinux: ${{ matrix.manylinux }}
+          args: --release --locked --out dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.target }}
+          path: dist/*.whl
+
+  pypi-sdist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-sdist
+          path: dist/*.tar.gz
+
+  pypi-publish:
+    needs: [release, pypi-wheels, pypi-sdist]
+    runs-on: ubuntu-latest
+    # PyPI Trusted Publishing: no API token; register this repo + workflow + environment on pypi.org.
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: dist
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  # npm: `capyshield` launcher + one @capyshield/<os>-<cpu> package per platform (esbuild-style).
+  npm-publish:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance / trusted publishing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - run: npm install -g npm@latest
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      # First release: set the NPM_TOKEN secret. Afterwards configure trusted publishing on npmjs.com and remove it.
+      - run: node npm/publish.mjs "${GITHUB_REF_NAME#v}" dist --publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
