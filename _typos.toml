@@ -1,0 +1,3 @@
+[default.extend-words]
+# Fly.io token prefix (`fo1_`) in crates/capyshield-scanner/src/patterns.rs
+fo = "fo"
