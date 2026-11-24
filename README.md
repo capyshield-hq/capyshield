@@ -6,8 +6,8 @@
 
 Stop secrets from leaving your build, CI or AI agent, and cut CVE noise down to what your code actually reaches.
 
-[![CI](https://github.com/capyshield/capyshield/actions/workflows/ci.yml/badge.svg)](https://github.com/capyshield/capyshield/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/capyshield/capyshield)](https://github.com/capyshield/capyshield/releases)
+[![CI](https://github.com/capyshield-hq/capyshield/actions/workflows/ci.yml/badge.svg)](https://github.com/capyshield-hq/capyshield/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/capyshield-hq/capyshield)](https://github.com/capyshield-hq/capyshield/releases)
 [![crates.io](https://img.shields.io/crates/v/capyshield)](https://crates.io/crates/capyshield)
 [![PyPI](https://img.shields.io/pypi/v/capyshield)](https://pypi.org/project/capyshield/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
@@ -62,10 +62,10 @@ CapyShield ships as one self-contained binary for **Linux** (x86_64, arm64; glib
 | **npm** (run without installing) | `npx capyshield watch -- npm install` |
 | **npm** (install) | `npm install -g capyshield` or `npm install -D capyshield` |
 | **Cargo** | `cargo install capyshield --locked` |
-| **Homebrew** | `brew install capyshield/tap/capyshield` |
-| **Docker** | `docker run --rm -v "$PWD:/src" -w /src ghcr.io/capyshield/capyshield:latest --help` |
-| **Prebuilt binaries** | [GitHub Releases](https://github.com/capyshield/capyshield/releases), with a SHA-256 checksum and SLSA build provenance for every archive |
-| **GitHub Actions** | `uses: capyshield/capyshield/action@v1` |
+| **Homebrew** | `brew install capyshield-hq/tap/capyshield` |
+| **Docker** | `docker run --rm -v "$PWD:/src" -w /src ghcr.io/capyshield-hq/capyshield:latest --help` |
+| **Prebuilt binaries** | [GitHub Releases](https://github.com/capyshield-hq/capyshield/releases), with a SHA-256 checksum and SLSA build provenance for every archive |
+| **GitHub Actions** | `uses: capyshield-hq/capyshield/action@v1` |
 
 The PyPI and npm packages contain only the native binary. PyPI ships it as a platform wheel. npm ships a small launcher plus a per-platform `@capyshield/<os>-<cpu>` package, and installs only the one that matches your machine. Neither has runtime dependencies.
 
@@ -73,7 +73,7 @@ To verify a downloaded release:
 
 ```bash
 shasum -a 256 -c capyshield-x86_64-unknown-linux-musl.tar.gz.sha256
-gh attestation verify capyshield-x86_64-unknown-linux-musl.tar.gz --repo capyshield/capyshield
+gh attestation verify capyshield-x86_64-unknown-linux-musl.tar.gz --repo capyshield-hq/capyshield
 ```
 
 ## Quickstart
@@ -249,7 +249,7 @@ To build a tight allowlist, run your build once with `capyshield watch --emit-po
 ### GitHub Actions
 
 ```yaml
-- uses: capyshield/capyshield/action@v1
+- uses: capyshield-hq/capyshield/action@v1
 - run: capyshield guard --config capyshield.yaml --report egress.json -- npm ci
 - run: |
     trivy fs --format json -o trivy.json .
@@ -278,7 +278,7 @@ CapyShield writes only to stderr, so an MCP server's stdio JSON-RPC channel is u
 ### Docker
 
 ```dockerfile
-FROM ghcr.io/capyshield/capyshield:latest AS capyshield
+FROM ghcr.io/capyshield-hq/capyshield:latest AS capyshield
 FROM node:22-alpine
 COPY --from=capyshield /usr/local/bin/capyshield /usr/local/bin/capyshield
 ENTRYPOINT ["capyshield", "guard", "--config", "/app/capyshield.yaml", "--"]

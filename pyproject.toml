@@ -27,8 +27,8 @@ dynamic = ["version"]
 
 [project.urls]
 Homepage = "https://capyshield.com"
-Repository = "https://github.com/capyshield/capyshield"
-Issues = "https://github.com/capyshield/capyshield/issues"
+Repository = "https://github.com/capyshield-hq/capyshield"
+Issues = "https://github.com/capyshield-hq/capyshield/issues"
 
 [tool.maturin]
 bindings = "bin"

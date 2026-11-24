@@ -28,7 +28,7 @@ runs:
           macOS-X64)   target=x86_64-apple-darwin ;;
           *) echo "::error::capyshield has no build for ${RUNNER_OS}-${RUNNER_ARCH}"; exit 1 ;;
         esac
-        base=https://github.com/capyshield/capyshield/releases
+        base=https://github.com/capyshield-hq/capyshield/releases
         if [ "$VERSION" = latest ]; then url="$base/latest/download"; else url="$base/download/$VERSION"; fi
         dir="$RUNNER_TEMP/capyshield"
         mkdir -p "$dir" && cd "$dir"
