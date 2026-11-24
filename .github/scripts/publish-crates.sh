@@ -21,8 +21,21 @@ for crate in "${crates[@]}"; do
     fi
     echo "$out" | tail -4
     grep -q '429' <<<"$out" || exit 1
-    echo "rate limited by crates.io; retrying $crate in 10 minutes (attempt $attempt/8)"
-    sleep 600
+    # crates.io says exactly when to retry ("Please try again after Tue, 24 Nov 2026 21:31:37 GMT");
+    # count down to that moment, falling back to 10 minutes if the message changes.
+    retry_at=$(grep -oE 'try again after [A-Za-z]{3}, [0-9]{1,2} [A-Za-z]{3} [0-9]{4} [0-9:]{8} GMT' <<<"$out" | sed 's/try again after //' || true)
+    wait=600
+    if [ -n "$retry_at" ] && until_ts=$(date -u -d "$retry_at" +%s 2>/dev/null); then
+      wait=$(( until_ts - $(date -u +%s) + 5 ))
+    fi
+    (( wait < 5 )) && wait=5
+    echo "rate limited by crates.io (attempt $attempt/8); retrying $crate at ${retry_at:-+10 min}"
+    while (( wait > 0 )); do
+      echo "  $crate: retry in ${wait}s"
+      step=$(( wait < 60 ? wait : 60 ))
+      sleep "$step"
+      wait=$(( wait - step ))
+    done
   done
   echo "giving up on $crate after 8 rate-limited attempts" >&2
   exit 1

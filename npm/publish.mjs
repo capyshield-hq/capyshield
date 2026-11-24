@@ -66,7 +66,7 @@ dirs.push(mainDir); // platform packages first so the main package never points 
 // Idempotent: a re-run after a partial failure skips versions that are already on the registry.
 const published = (name) => {
   try {
-    return execFileSync("npm", ["view", `${name}@${version}`, "version"], { encoding: "utf8" }).trim() === version;
+    return execFileSync("npm", ["view", `${name}@${version}`, "version"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim() === version;
   } catch {
     return false;
   }
