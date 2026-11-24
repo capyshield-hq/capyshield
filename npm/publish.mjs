@@ -54,7 +54,22 @@ for (const dep of Object.keys(main.optionalDependencies)) main.optionalDependenc
 writeFileSync(join(mainDir, "package.json"), JSON.stringify(main, null, 2) + "\n");
 dirs.push(mainDir); // platform packages first so the main package never points at missing versions
 
+// Idempotent: a re-run after a partial failure skips versions that are already on the registry.
+const published = (name) => {
+  try {
+    return execFileSync("npm", ["view", `${name}@${version}`, "version"], { encoding: "utf8" }).trim() === version;
+  } catch {
+    return false;
+  }
+};
+
 for (const dir of dirs) {
-  const args = flag === "--publish" ? ["publish", "--provenance", "--access", "public"] : ["pack", "--pack-destination", out];
-  execFileSync("npm", args, { cwd: dir, stdio: "inherit" });
+  const { name } = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
+  if (flag !== "--publish") {
+    execFileSync("npm", ["pack", "--pack-destination", out], { cwd: dir, stdio: "inherit" });
+  } else if (published(name)) {
+    console.log(`skip ${name}@${version}: already published`);
+  } else {
+    execFileSync("npm", ["publish", "--provenance", "--access", "public"], { cwd: dir, stdio: "inherit" });
+  }
 }
