@@ -131,8 +131,10 @@ jobs:
         run: |
           {
             echo "list<<EOF"
+            # Docker tags can't contain "/" (dry runs from branches like ci/foo).
+            ref="${GITHUB_REF_NAME//\//-}"
             for image in ghcr.io/capyshield-hq/capyshield ${DOCKERHUB_TOKEN:+docker.io/${DOCKERHUB_NAMESPACE:-$DOCKERHUB_USERNAME}/capyshield}; do
-              echo "$image:$GITHUB_REF_NAME"
+              echo "$image:$ref"
               echo "$image:latest"
             done
             echo "EOF"
