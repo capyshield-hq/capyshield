@@ -1,4 +1,4 @@
-FROM ghcr.io/capyshield/capyshield:latest AS capyshield
+FROM ghcr.io/capyshield-hq/capyshield:latest AS capyshield
 
 FROM node:22-alpine
 COPY --from=capyshield /usr/local/bin/capyshield /usr/local/bin/capyshield

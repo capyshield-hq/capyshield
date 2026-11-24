@@ -81,6 +81,8 @@ jobs:
       # Optional Docker Hub mirror: pushed only when these are configured.
       DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      # Docker Hub namespace (org); defaults to the login user.
+      DOCKERHUB_NAMESPACE: ${{ vars.DOCKERHUB_NAMESPACE }}
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
@@ -99,7 +101,7 @@ jobs:
         run: |
           {
             echo "list<<EOF"
-            for image in ghcr.io/capyshield/capyshield ${DOCKERHUB_TOKEN:+docker.io/capyshield/capyshield}; do
+            for image in ghcr.io/capyshield-hq/capyshield ${DOCKERHUB_TOKEN:+docker.io/${DOCKERHUB_NAMESPACE:-$DOCKERHUB_USERNAME}/capyshield}; do
               echo "$image:$GITHUB_REF_NAME"
               echo "$image:latest"
             done
