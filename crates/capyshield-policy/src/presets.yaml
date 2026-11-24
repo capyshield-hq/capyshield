@@ -1,0 +1,48 @@
+# Named host presets for `egress.allow_presets`. Compiled into the binary.
+# Keep presets narrow: allowing a host means secrets in auth headers may go there.
+# Presets marked USER CONTENT serve data anyone can upload, so they are also an exfiltration channel.
+# Request bodies and URLs to them are still scanned for secrets.
+
+npm: # npm, yarn classic and yarn berry registries
+  - registry.npmjs.org
+  - registry.yarnpkg.com
+  - repo.yarnpkg.com
+nodejs: # node-gyp headers, Node.js downloads
+  - nodejs.org
+github: # USER CONTENT. git dependencies, release-asset downloads from postinstall scripts
+  - github.com
+  - api.github.com
+  - codeload.github.com
+  - objects.githubusercontent.com
+  - raw.githubusercontent.com
+  - release-assets.githubusercontent.com
+gitlab: # USER CONTENT. gitlab.com git deps, API/package registry, container registry
+  - gitlab.com
+  - registry.gitlab.com
+bitbucket: # USER CONTENT. git deps, API, repository downloads (served from S3)
+  - bitbucket.org
+  - api.bitbucket.org
+  - bbuseruploads.s3.amazonaws.com
+chrome-for-testing: # USER CONTENT (any GCS bucket). Puppeteer/Playwright browser downloads
+  - storage.googleapis.com
+python: # pip, uv, poetry
+  - pypi.org
+  - files.pythonhosted.org
+pytorch: # extra index for torch wheels
+  - download.pytorch.org
+rust: # cargo, rustup
+  - crates.io
+  - index.crates.io
+  - static.crates.io
+  - static.rust-lang.org
+go: # go modules proxy + checksum DB
+  - proxy.golang.org
+  - sum.golang.org
+docker: # Docker Hub pulls
+  - registry-1.docker.io
+  - auth.docker.io
+  - production.cloudflare.docker.com
+anthropic:
+  - api.anthropic.com
+openai:
+  - api.openai.com

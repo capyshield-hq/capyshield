@@ -1,0 +1,30 @@
+[package]
+name = "capyshield"
+description = "Deterministic zero-trust egress guard and local VEX/reachability engine"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "../../README.md"
+keywords = ["security", "egress", "openvex", "supply-chain", "proxy"]
+categories = ["command-line-utilities"]
+
+[[bin]]
+name = "capyshield"
+path = "src/main.rs"
+
+[dependencies]
+capyshield-policy.workspace = true
+capyshield-scanner.workspace = true
+capyshield-proxy.workspace = true
+capyshield-reach.workspace = true
+capyshield-vex.workspace = true
+capyshield-sync.workspace = true
+tokio.workspace = true
+serde_json.workspace = true
+clap.workspace = true
+colored.workspace = true
+tracing-subscriber.workspace = true
+time.workspace = true

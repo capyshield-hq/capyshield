@@ -1,0 +1,24 @@
+[package]
+name = "capyshield-proxy"
+description = "Local egress forward proxy with SNI and TLS MITM inspection"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+capyshield-policy.workspace = true
+capyshield-scanner.workspace = true
+tokio.workspace = true
+hyper.workspace = true
+hyper-util.workspace = true
+http-body-util.workspace = true
+bytes.workspace = true
+rustls.workspace = true
+tokio-rustls.workspace = true
+rcgen.workspace = true
+webpki-roots.workspace = true
+time.workspace = true
+serde.workspace = true
+tracing.workspace = true

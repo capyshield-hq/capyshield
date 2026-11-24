@@ -1,0 +1,15 @@
+[package]
+name = "capyshield-scanner"
+description = "Deterministic secret, ENV fingerprint, entropy and PII scanner"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+capyshield-policy.workspace = true
+aho-corasick.workspace = true
+regex.workspace = true
+base64.workspace = true
+hex.workspace = true
