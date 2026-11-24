@@ -1,0 +1,52 @@
+# Re-publish an existing release to one registry, e.g. after a partial failure in release.yml.
+#   gh workflow run republish.yml -f tag=v0.1.0 -f registry=npm
+#   gh workflow run republish.yml -f tag=v0.1.0 -f registry=crates-io
+name: republish
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag (e.g. v0.1.0)
+        required: true
+      registry:
+        description: Registry to publish to
+        required: true
+        type: choice
+        options: [npm, crates-io]
+permissions:
+  contents: read
+  id-token: write # npm provenance / trusted publishing
+jobs:
+  npm:
+    if: inputs.registry == 'npm'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - run: npm install -g npm@latest
+      - name: Download release binaries
+        run: gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern 'capyshield-*-*.tar.gz' --dir dist
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+      # Versions already on npm are skipped.
+      - run: node npm/publish.mjs "${TAG#v}" dist --publish
+        env:
+          TAG: ${{ inputs.tag }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  crates-io:
+    if: inputs.registry == 'crates-io'
+    runs-on: ubuntu-latest
+    steps:
+      # Publish the exact source of the release tag.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo publish --workspace --locked
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
