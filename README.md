@@ -9,10 +9,10 @@
 Stop secrets from leaving your build, CI or AI agent, and cut CVE noise down to what your code actually reaches.
 
 [![CI](https://github.com/capyshield-hq/capyshield/actions/workflows/ci.yml/badge.svg)](https://github.com/capyshield-hq/capyshield/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/capyshield-hq/capyshield)](https://github.com/capyshield-hq/capyshield/releases)
-[![crates.io](https://img.shields.io/crates/v/capyshield)](https://crates.io/crates/capyshield)
-[![PyPI](https://img.shields.io/pypi/v/capyshield)](https://pypi.org/project/capyshield/)
-[![npm](https://img.shields.io/npm/v/capyshield)](https://www.npmjs.com/package/capyshield)
+[![Release](https://img.shields.io/github/v/release/capyshield-hq/capyshield?logo=github&color=24292f)](https://github.com/capyshield-hq/capyshield/releases)
+[![crates.io](https://img.shields.io/crates/v/capyshield?logo=rust&logoColor=white&color=b7410e)](https://crates.io/crates/capyshield)
+[![PyPI](https://img.shields.io/pypi/v/capyshield?logo=python&logoColor=white&color=3572a5)](https://pypi.org/project/capyshield/)
+[![npm](https://img.shields.io/npm/v/capyshield?logo=npm&color=cb3837)](https://www.npmjs.com/package/capyshield)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/capyshield-hq/capyshield/blob/main/LICENSE)
 
 [Install](#installation) · [Quickstart](#quickstart) · [Egress guard](#egress-guard) · [VEX & reachability](#vex--reachability) · [Configuration](#configuration) · [CI & agents](#integrations)
