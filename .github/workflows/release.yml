@@ -10,7 +10,7 @@ jobs:
   check-version:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Tag must match the Cargo.toml version (crates.io and PyPI publish that version)
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
@@ -29,7 +29,7 @@ jobs:
           - { target: x86_64-apple-darwin, os: macos-latest }
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
@@ -41,7 +41,7 @@ jobs:
         run: |
           tar czf capyshield-${{ matrix.target }}.tar.gz capyshield
           shasum -a 256 capyshield-${{ matrix.target }}.tar.gz > capyshield-${{ matrix.target }}.tar.gz.sha256
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.target }}
           path: target/${{ matrix.target }}/release/capyshield-*
@@ -50,7 +50,7 @@ jobs:
     needs: build
     runs-on: macos-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: "*-apple-darwin"
           merge-multiple: true
@@ -59,7 +59,7 @@ jobs:
           lipo -create -output capyshield aarch64-apple-darwin/capyshield x86_64-apple-darwin/capyshield
           tar czf capyshield-universal-apple-darwin.tar.gz capyshield
           shasum -a 256 capyshield-universal-apple-darwin.tar.gz > capyshield-universal-apple-darwin.tar.gz.sha256
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: universal-apple-darwin
           path: capyshield-universal-apple-darwin.tar.gz*
@@ -73,12 +73,12 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: dist
           merge-multiple: true
       - name: SLSA build provenance
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: dist/*.tar.gz
       - run: gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --generate-notes
@@ -102,8 +102,8 @@ jobs:
       # Docker Hub namespace (org); defaults to the login user.
       DOCKERHUB_NAMESPACE: ${{ vars.DOCKERHUB_NAMESPACE }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: "*-unknown-linux-musl"
           merge-multiple: true
@@ -115,15 +115,15 @@ jobs:
             tar xzf "artifacts/capyshield-${pair#*:}-unknown-linux-musl.tar.gz" -C "dist/linux/${pair%%:*}"
           done
           file dist/linux/*/capyshield
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
       - if: env.DOCKERHUB_TOKEN != ''
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ env.DOCKERHUB_TOKEN }}
@@ -137,7 +137,7 @@ jobs:
             done
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: Dockerfile.release
@@ -150,7 +150,7 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - name: Publish all workspace crates
         env:
@@ -173,13 +173,13 @@ jobs:
           - { os: macos-latest, target: universal2-apple-darwin, manylinux: auto }
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
           manylinux: ${{ matrix.manylinux }}
           args: --release --locked --out dist
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: wheels-${{ matrix.target }}
           path: dist/*.whl
@@ -187,12 +187,12 @@ jobs:
   pypi-sdist:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: PyO3/maturin-action@v1
         with:
           command: sdist
           args: --out dist
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: wheels-sdist
           path: dist/*.tar.gz
@@ -205,7 +205,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: wheels-*
           path: dist
@@ -220,13 +220,13 @@ jobs:
       contents: read
       id-token: write # npm provenance / trusted publishing
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
       - run: npm install -g npm@latest
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: dist
           merge-multiple: true
