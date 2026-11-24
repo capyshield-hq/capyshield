@@ -1,0 +1,7 @@
+/target
+*.openvex.json
+
+PRD.md
+.env*
+venv/
+/npm/dist
