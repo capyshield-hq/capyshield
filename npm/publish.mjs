@@ -37,11 +37,20 @@ for (const [platform, target] of Object.entries(PLATFORMS)) {
     repository: main.repository,
     license: main.license,
     author: main.author,
+    homepage: main.homepage,
+    keywords: main.keywords,
     os: [os],
     cpu: [cpu],
     files: ["bin"],
   };
   writeFileSync(join(dir, "package.json"), JSON.stringify(pkg, null, 2) + "\n");
+  writeFileSync(
+    join(dir, "README.md"),
+    `# @capyshield/${platform}\n\nThe native \`capyshield\` binary for ${platform}. Don't install this directly: it is an optional\n` +
+      `dependency of [\`capyshield\`](https://www.npmjs.com/package/capyshield), which picks the right platform package.\n\n` +
+      "```bash\nnpx capyshield watch -- npm install\n```\n\n" +
+      "See https://github.com/capyshield-hq/capyshield for documentation.\n",
+  );
   dirs.push(dir);
 }
 

@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/logo.png" alt="CapyShield logo" width="110">
+<img src="https://raw.githubusercontent.com/capyshield-hq/capyshield/main/docs/assets/logo.png" alt="CapyShield logo" width="110">
 
 # CapyShield
 
@@ -13,11 +13,11 @@ Stop secrets from leaving your build, CI or AI agent, and cut CVE noise down to 
 [![crates.io](https://img.shields.io/crates/v/capyshield)](https://crates.io/crates/capyshield)
 [![PyPI](https://img.shields.io/pypi/v/capyshield)](https://pypi.org/project/capyshield/)
 [![npm](https://img.shields.io/npm/v/capyshield)](https://www.npmjs.com/package/capyshield)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/capyshield-hq/capyshield/blob/main/LICENSE)
 
 [Install](#installation) · [Quickstart](#quickstart) · [Egress guard](#egress-guard) · [VEX & reachability](#vex--reachability) · [Configuration](#configuration) · [CI & agents](#integrations)
 
-<img src="docs/demo.gif" alt="capyshield watching npm install, then blocking an AWS secret exfiltration with exit code 2" width="860">
+<img src="https://raw.githubusercontent.com/capyshield-hq/capyshield/main/docs/demo.gif" alt="capyshield watching npm install, then blocking an AWS secret exfiltration with exit code 2" width="860">
 
 </div>
 
@@ -54,7 +54,7 @@ capyshield: 2 connection(s) to 1 host(s)
 - [Privacy](#privacy)
 - [Performance](#performance)
 - [Security model & limitations](#security-model--limitations)
-- [How it works (architecture & diagrams)](docs/how-it-works.md)
+- [How it works (architecture & diagrams)](https://github.com/capyshield-hq/capyshield/blob/main/docs/how-it-works.md)
 - [Contributing](#contributing)
 
 ## Installation
@@ -132,7 +132,7 @@ flowchart LR
     proxy -.->|blocked → exit 2| cmd
 ```
 
-How the proxy decides, step by step (CONNECT/SNI vs MITM, request inspection, the scanner pipeline, fail modes and the VEX triage tree), is described with diagrams in **[docs/how-it-works.md](docs/how-it-works.md)**.
+How the proxy decides, step by step (CONNECT/SNI vs MITM, request inspection, the scanner pipeline, fail modes and the VEX triage tree), is described with diagrams in **[docs/how-it-works.md](https://github.com/capyshield-hq/capyshield/blob/main/docs/how-it-works.md)**.
 
 ### Detection
 
@@ -306,7 +306,7 @@ ENTRYPOINT ["capyshield", "guard", "--config", "/app/capyshield.yaml", "--"]
 CMD ["node", "server.js"]
 ```
 
-Complete examples are in [`examples/`](examples/). To see what each command outputs without running it, see [`examples/sample-output/`](examples/sample-output/): real terminal captures, reports, OpenVEX and a redacted sync payload.
+Complete examples are in [`examples/`](https://github.com/capyshield-hq/capyshield/blob/main/examples/). To see what each command outputs without running it, see [`examples/sample-output/`](https://github.com/capyshield-hq/capyshield/blob/main/examples/sample-output/): real terminal captures, reports, OpenVEX and a redacted sync payload.
 
 ## Exit codes
 
@@ -355,10 +355,10 @@ Full inspection means the host policy check plus pattern, ENV, PII and entropy s
 ## Security model & limitations
 
 - **The proxy is cooperative.** It reliably covers tools that honor proxy variables: npm, pip, uv, curl, git, most SDKs and agent runtimes. Code that deliberately opens raw sockets can bypass it. For a hard boundary, run the command in a container or network namespace whose only way out is the CapyShield proxy.
-- **Reachability is static and package-level** ([details](docs/how-it-works.md#triage-decision)). It uses lockfiles and import statements, not call graphs. Transitive dependencies that aren't imported directly are reported as `under_investigation` rather than guessed. Record your own triage decisions as local VEX rules.
+- **Reachability is static and package-level** ([details](https://github.com/capyshield-hq/capyshield/blob/main/docs/how-it-works.md#triage-decision)). It uses lockfiles and import statements, not call graphs. Transitive dependencies that aren't imported directly are reported as `under_investigation` rather than guessed. Record your own triage decisions as local VEX rules.
 - **Payload inspection over HTTPS needs `mitm`.** In `sni` mode, the policy is enforced on hosts and byte counts only.
 
-Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
+Report vulnerabilities privately as described in [SECURITY.md](https://github.com/capyshield-hq/capyshield/blob/main/SECURITY.md).
 
 ## Open source & CapyShield Cloud
 
@@ -372,11 +372,11 @@ This repository is the complete, standalone data plane, and is free under Apache
 
 ## Contributing
 
-Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, pre-commit hooks and how to add secret patterns.
+Contributions are welcome. See [CONTRIBUTING.md](https://github.com/capyshield-hq/capyshield/blob/main/CONTRIBUTING.md) for the development setup, pre-commit hooks and how to add secret patterns.
 
 ### Regenerating the demo GIF
 
-The terminal recording at the top of this README is scripted in [`docs/demo.tape`](docs/demo.tape) and rendered with [VHS](https://github.com/charmbracelet/vhs). To re-record it after the CLI output changes, run this from the repository root (it needs network access for npm and httpbin.org):
+The terminal recording at the top of this README is scripted in [`docs/demo.tape`](https://github.com/capyshield-hq/capyshield/blob/main/docs/demo.tape) and rendered with [VHS](https://github.com/charmbracelet/vhs). To re-record it after the CLI output changes, run this from the repository root (it needs network access for npm and httpbin.org):
 
 ```bash
 brew install vhs            # or see the VHS README for Linux packages
@@ -397,4 +397,4 @@ crates/
 
 ## License
 
-[Apache License 2.0](LICENSE)
+[Apache License 2.0](https://github.com/capyshield-hq/capyshield/blob/main/LICENSE)

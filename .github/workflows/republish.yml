@@ -42,11 +42,16 @@ jobs:
     if: inputs.registry == 'crates-io'
     runs-on: ubuntu-latest
     steps:
-      # Publish the exact source of the release tag.
+      # Publish the exact source of the release tag, with the publish script from main
+      # (older tags predate it).
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.tag }}
+      - uses: actions/checkout@v4
+        with:
+          path: _main
+          sparse-checkout: .github/scripts
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo publish --workspace --locked
+      - run: bash _main/.github/scripts/publish-crates.sh
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
