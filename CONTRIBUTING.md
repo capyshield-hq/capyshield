@@ -50,6 +50,21 @@ Add a row to `crates/capyshield-scanner/src/patterns.rs`:
 - Regexes run on bytes with Unicode disabled; no look-around.
 - Prefer a distinctive prefix over generic `key = value` heuristics, and add a positive case to `detects_known_formats` when the format is common.
 
+## Demo GIF
+
+`docs/demo.gif` (shown at the top of the README) is rendered from `docs/demo.tape` with [VHS](https://github.com/charmbracelet/vhs):
+
+```bash
+brew install vhs
+cargo build --release
+vhs docs/demo.tape
+```
+
+- **What runs off-camera:** a hidden setup block puts `target/release` on `PATH`, uses a throwaway `HOME` (with a CA from `capyshield init`) and a fresh npm cache, and exports AWS's documented fake `EXAMPLE` key. No personal paths or real secrets appear.
+- **Network:** the recording makes real requests to `registry.npmjs.org` and `httpbin.org`.
+- **When to re-record:** whenever `watch`/`guard` terminal output changes. Check a few frames before committing, for example `ffmpeg -sseof -0.2 -i docs/demo.gif -frames:v 1 last.png`.
+- **Size:** keep the GIF under the 512 KB `check-added-large-files` limit. The current one is about 210 KB.
+
 ## Packaging
 
 The same native binary is distributed through several channels. All of them are built by `.github/workflows/release.yml` on a `v*` tag:

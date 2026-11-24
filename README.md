@@ -341,6 +341,16 @@ This repository is the complete, standalone data plane, and is free under Apache
 
 Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, pre-commit hooks and how to add secret patterns.
 
+### Regenerating the demo GIF
+
+The terminal recording at the top of this README is scripted in [`docs/demo.tape`](docs/demo.tape) and rendered with [VHS](https://github.com/charmbracelet/vhs). To re-record it after the CLI output changes, run this from the repository root (it needs network access for npm and httpbin.org):
+
+```bash
+brew install vhs            # or see the VHS README for Linux packages
+cargo build --release       # the tape runs ./target/release/capyshield
+vhs docs/demo.tape          # writes docs/demo.gif
+```
+
 ```text
 crates/
 ├── capyshield-cli/       CLI entrypoint, terminal output, exit codes
