@@ -1,0 +1,13 @@
+{
+  "events": [
+    {
+      "action": "blocked",
+      "bytes_sent": 42,
+      "destination_host": "httpbin.org",
+      "port": 443,
+      "protocol": "https-mitm",
+      "rule_id": "secret_leak:env:AWS_SECRET_ACCESS_KEY",
+      "timestamp": "2026-11-24T20:19:37.568162Z"
+    }
+  ]
+}

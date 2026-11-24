@@ -1,0 +1,8 @@
+capyshield: enforce mode, mitm TLS, 2 sensitive ENV value(s) fingerprinted, proxy http://127.0.0.1:49412
+capyshield: BLOCKED httpbin.org:443 (secret_leak:env:AWS_SECRET_ACCESS_KEY)
+
+ACTION   DESTINATION          PROTOCOL   CONNS       SENT  RULE
+blocked  httpbin.org:443      https-mitm     1       42 B  secret_leak:env:AWS_SECRET_ACCESS_KEY
+capyshield: 1 connection(s) to 1 host(s)
+WARNING: sensitive ENV value AWS_SECRET_ACCESS_KEY appeared in an outbound request to httpbin.org (Blocked)
+exit code: 2

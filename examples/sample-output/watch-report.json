@@ -1,0 +1,22 @@
+{
+  "events": [
+    {
+      "action": "allowed",
+      "bytes_sent": 2610,
+      "destination_host": "registry.npmjs.org",
+      "port": 443,
+      "protocol": "https-sni",
+      "rule_id": null,
+      "timestamp": "2026-11-24T20:19:37.34615Z"
+    },
+    {
+      "action": "allowed",
+      "bytes_sent": 2122,
+      "destination_host": "registry.npmjs.org",
+      "port": 443,
+      "protocol": "https-sni",
+      "rule_id": null,
+      "timestamp": "2026-11-24T20:19:37.346257Z"
+    }
+  ]
+}

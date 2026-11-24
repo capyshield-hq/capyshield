@@ -1,0 +1,10 @@
+capyshield: 22 trivy finding(s), 1 source file(s) analyzed: 6 affected, 2 not_affected, 14 under_investigation, 0 fixed
+  affected CVE-2020-28500 lodash@4.17.20 (medium, imported in 1 file(s))
+  affected CVE-2021-23337 lodash@4.17.20 (high, imported in 1 file(s))
+  affected CVE-2024-29041 express@4.17.1 (medium, imported in 1 file(s))
+  affected CVE-2024-43796 express@4.17.1 (low, imported in 1 file(s))
+  affected CVE-2025-13465 lodash@4.17.20 (medium, imported in 1 file(s))
+  affected CVE-2026-4800 lodash@4.17.20 (high, imported in 1 file(s))
+capyshield: wrote openvex.json
+capyshield: FAIL 2 affected finding(s) at severity high,critical
+exit code: 3

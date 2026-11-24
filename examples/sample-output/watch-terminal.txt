@@ -1,0 +1,10 @@
+capyshield: audit mode, sni TLS, 1 sensitive ENV value(s) fingerprinted, proxy http://127.0.0.1:49407
+npm warn deprecated left-pad@1.3.0: use String.prototype.padStart()
+
+added 1 package in 497ms
+
+ACTION   DESTINATION              PROTOCOL   CONNS       SENT  RULE
+allowed  registry.npmjs.org:443   https-sni      2     4.6 KB
+capyshield: 2 connection(s) to 1 host(s)
+note: HTTPS payloads were not decrypted; use --tls mitm to scan them for secrets
+capyshield: wrote emitted-policy.yaml (review it, then: capyshield guard --config emitted-policy.yaml -- ...)
