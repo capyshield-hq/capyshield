@@ -1,0 +1,41 @@
+name: CapyShield
+author: Agus Makmun
+description: Install capyshield, the deterministic egress guard and OpenVEX reachability engine
+branding:
+  icon: shield
+  color: green
+inputs:
+  version:
+    description: Release tag to install (e.g. v0.1.0), or "latest"
+    default: latest
+outputs:
+  path:
+    description: Absolute path of the installed binary
+    value: ${{ steps.install.outputs.path }}
+runs:
+  using: composite
+  steps:
+    - id: install
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |
+        set -euo pipefail
+        case "${RUNNER_OS}-${RUNNER_ARCH}" in
+          Linux-X64)   target=x86_64-unknown-linux-musl ;;
+          Linux-ARM64) target=aarch64-unknown-linux-musl ;;
+          macOS-ARM64) target=aarch64-apple-darwin ;;
+          macOS-X64)   target=x86_64-apple-darwin ;;
+          *) echo "::error::capyshield has no build for ${RUNNER_OS}-${RUNNER_ARCH}"; exit 1 ;;
+        esac
+        base=https://github.com/capyshield/capyshield/releases
+        if [ "$VERSION" = latest ]; then url="$base/latest/download"; else url="$base/download/$VERSION"; fi
+        dir="$RUNNER_TEMP/capyshield"
+        mkdir -p "$dir" && cd "$dir"
+        curl -fsSLO "$url/capyshield-$target.tar.gz"
+        curl -fsSLO "$url/capyshield-$target.tar.gz.sha256"
+        shasum -a 256 -c "capyshield-$target.tar.gz.sha256"
+        tar xzf "capyshield-$target.tar.gz"
+        echo "$dir" >> "$GITHUB_PATH"
+        echo "path=$dir/capyshield" >> "$GITHUB_OUTPUT"
+        "$dir/capyshield" --version

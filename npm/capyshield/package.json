@@ -1,0 +1,35 @@
+{
+  "name": "capyshield",
+  "version": "0.0.0",
+  "description": "Deterministic zero-trust egress guard and local VEX/reachability engine",
+  "keywords": [
+    "security",
+    "egress",
+    "openvex",
+    "supply-chain",
+    "ai-agents",
+    "mcp"
+  ],
+  "homepage": "https://capyshield.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/capyshield/capyshield.git"
+  },
+  "license": "Apache-2.0",
+  "author": "Agus Makmun <summon.agus@gmail.com>",
+  "bin": {
+    "capyshield": "bin/capyshield.js"
+  },
+  "files": [
+    "bin"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "optionalDependencies": {
+    "@capyshield/darwin-arm64": "0.0.0",
+    "@capyshield/darwin-x64": "0.0.0",
+    "@capyshield/linux-arm64": "0.0.0",
+    "@capyshield/linux-x64": "0.0.0"
+  }
+}
