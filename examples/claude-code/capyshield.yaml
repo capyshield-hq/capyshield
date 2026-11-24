@@ -1,0 +1,21 @@
+version: 1
+mode: enforce
+fail_mode: fail_closed
+egress:
+  tls_inspection: mitm
+  deny_hosts: ["*.ngrok-free.app", "webhook.site", "*.requestcatcher.com", "pastebin.com"]
+  max_outbound_bytes: 65536
+  scan:
+    pii_patterns: ["credit_card", "private_key", "email"]
+    secret_allow:
+      ANTHROPIC_API_KEY: ["api.anthropic.com"]
+      GITHUB_PERSONAL_ACCESS_TOKEN: ["api.github.com"]
+agents:
+  claude-code:
+    # Agent allow_hosts replace the global list (presets are global-only), so hosts are spelled out.
+    allow_hosts: ["api.anthropic.com", "statsig.anthropic.com", "registry.npmjs.org", "pypi.org", "files.pythonhosted.org", "github.com", "api.github.com"]
+  mcp-fetch:
+    # The fetch server legitimately browses, but may never upload much.
+    max_outbound_bytes: 4096
+  mcp-github:
+    allow_hosts: ["api.github.com"]
