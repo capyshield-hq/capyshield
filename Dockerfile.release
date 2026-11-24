@@ -1,0 +1,12 @@
+# Release image: packages the static musl binaries already built (and checksummed) by the
+# release workflow, so no Rust compile runs under QEMU. For a from-source build use ./Dockerfile.
+FROM alpine:3
+ARG TARGETARCH
+LABEL org.opencontainers.image.title="capyshield" \
+      org.opencontainers.image.description="Deterministic zero-trust egress guard and local VEX/reachability engine" \
+      org.opencontainers.image.authors="Agus Makmun <summon.agus@gmail.com>" \
+      org.opencontainers.image.source="https://github.com/capyshield-hq/capyshield" \
+      org.opencontainers.image.licenses="Apache-2.0"
+RUN apk add --no-cache ca-certificates
+COPY dist/linux/${TARGETARCH}/capyshield /usr/local/bin/capyshield
+ENTRYPOINT ["capyshield"]

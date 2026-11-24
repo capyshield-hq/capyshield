@@ -86,7 +86,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
   docker:
-    needs: check-version
+    # Reuses the musl binaries from `build` (see Dockerfile.release): ~1 min instead of
+    # recompiling Rust for arm64 under QEMU (~35 min).
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -101,6 +103,18 @@ jobs:
       DOCKERHUB_NAMESPACE: ${{ vars.DOCKERHUB_NAMESPACE }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: "*-unknown-linux-musl"
+          merge-multiple: true
+          path: artifacts
+      - name: Lay out binaries per Docker platform
+        run: |
+          for pair in amd64:x86_64 arm64:aarch64; do
+            mkdir -p "dist/linux/${pair%%:*}"
+            tar xzf "artifacts/capyshield-${pair#*:}-unknown-linux-musl.tar.gz" -C "dist/linux/${pair%%:*}"
+          done
+          file dist/linux/*/capyshield
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
@@ -125,6 +139,8 @@ jobs:
           } >> "$GITHUB_OUTPUT"
       - uses: docker/build-push-action@v6
         with:
+          context: .
+          file: Dockerfile.release
           platforms: linux/amd64,linux/arm64
           push: ${{ startsWith(github.ref, 'refs/tags/v') }}
           provenance: mode=max
