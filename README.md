@@ -14,6 +14,8 @@ Stop secrets from leaving your build, CI or AI agent, and cut CVE noise down to 
 
 [Install](#installation) · [Quickstart](#quickstart) · [Egress guard](#egress-guard) · [VEX & reachability](#vex--reachability) · [Configuration](#configuration) · [CI & agents](#integrations)
 
+<img src="docs/demo.gif" alt="capyshield watching npm install, then blocking an AWS secret exfiltration with exit code 2" width="860">
+
 </div>
 
 ---
