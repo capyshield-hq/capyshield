@@ -160,7 +160,7 @@ checksum = "776dfebd015e2d8732c684a2c71003674ccb49457b539b9e82151ba38e96dd7c"
 
 [[package]]
 name = "capyshield"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "capyshield-policy",
  "capyshield-proxy",
@@ -178,7 +178,7 @@ dependencies = [
 
 [[package]]
 name = "capyshield-policy"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "serde_yaml",
@@ -186,7 +186,7 @@ dependencies = [
 
 [[package]]
 name = "capyshield-proxy"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "bytes",
  "capyshield-policy",
@@ -206,7 +206,7 @@ dependencies = [
 
 [[package]]
 name = "capyshield-reach"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "globset",
  "regex",
@@ -218,7 +218,7 @@ dependencies = [
 
 [[package]]
 name = "capyshield-scanner"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "aho-corasick",
  "base64 0.22.1",
@@ -229,7 +229,7 @@ dependencies = [
 
 [[package]]
 name = "capyshield-sync"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "bytes",
  "http-body-util",
@@ -244,7 +244,7 @@ dependencies = [
 
 [[package]]
 name = "capyshield-vex"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "capyshield-reach",
  "hex",
