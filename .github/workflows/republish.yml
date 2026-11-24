@@ -1,6 +1,9 @@
 # Re-publish an existing release to one registry, e.g. after a partial failure in release.yml.
 #   gh workflow run republish.yml -f tag=v0.1.0 -f registry=npm
 #   gh workflow run republish.yml -f tag=v0.1.0 -f registry=crates-io
+#   gh workflow run republish.yml -f tag=v0.1.0 -f registry=pypi
+#   gh workflow run republish.yml -f tag=v0.1.0 -f registry=docker
+# Every job is idempotent: artifacts that already exist are skipped or overwritten.
 name: republish
 on:
   workflow_dispatch:
@@ -12,7 +15,7 @@ on:
         description: Registry to publish to
         required: true
         type: choice
-        options: [npm, crates-io]
+        options: [npm, crates-io, pypi, docker]
 permissions:
   contents: read
   id-token: write # npm provenance / trusted publishing
@@ -55,3 +58,71 @@ jobs:
       - run: bash _main/.github/scripts/publish-crates.sh
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  pypi:
+    if: inputs.registry == 'pypi'
+    runs-on: ubuntu-latest
+    # Trusted publishing: add republish.yml + environment "pypi" as a publisher on pypi.org.
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - name: Download wheels and sdist from the release
+        run: gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern '*.whl' --pattern "capyshield-${TAG#v}.tar.gz" --dir dist
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+
+  docker:
+    if: inputs.registry == 'docker'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      DOCKERHUB_NAMESPACE: ${{ vars.DOCKERHUB_NAMESPACE }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Download the release's musl binaries
+        run: |
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern 'capyshield-*-unknown-linux-musl.tar.gz' --dir artifacts
+          for pair in amd64:x86_64 arm64:aarch64; do
+            mkdir -p "dist/linux/${pair%%:*}"
+            tar xzf "artifacts/capyshield-${pair#*:}-unknown-linux-musl.tar.gz" -C "dist/linux/${pair%%:*}"
+          done
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - if: env.DOCKERHUB_TOKEN != ''
+        uses: docker/login-action@v4
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+      # Only the release's own tag: republishing an old release must not move `latest`.
+      - id: tags
+        run: |
+          {
+            echo "list<<EOF"
+            echo "ghcr.io/capyshield-hq/capyshield:$TAG"
+            [ -n "$DOCKERHUB_TOKEN" ] && echo "docker.io/${DOCKERHUB_NAMESPACE:-$DOCKERHUB_USERNAME}/capyshield:$TAG"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile.release
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.tags.outputs.list }}
