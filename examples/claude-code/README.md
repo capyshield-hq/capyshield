@@ -31,5 +31,12 @@ stderr, so the stdio JSON-RPC channel on stdout is untouched.
 }
 ```
 
+[`mcp.json`](mcp.json) wraps two servers: `fetch`, which browses but may only upload 4 KB, and
+`filesystem`, which is local-only, so its agent profile denies all egress (`deny_hosts: ["*"]`). If the
+filesystem server is ever tricked into making a network call, capyshield blocks it.
+
+To skip installing capyshield, swap `"command": "capyshield"` for `"command": "uvx"` and put
+`"capyshield"` first in `args` (or use `npx` the same way).
+
 The `agents:` block in [`capyshield.yaml`](capyshield.yaml) gives each agent its own allowlist and
 upload limit. A request can also pick its identity per call with the `X-Agent-ID` header.
