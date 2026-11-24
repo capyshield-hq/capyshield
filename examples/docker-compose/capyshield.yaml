@@ -1,0 +1,10 @@
+version: 1
+mode: enforce
+fail_mode: fail_closed
+egress:
+  tls_inspection: sni
+  allow_presets: ["npm", "openai"]
+  max_outbound_bytes: 65536
+  scan:
+    secret_allow:
+      OPENAI_API_KEY: ["api.openai.com"]

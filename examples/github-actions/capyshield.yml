@@ -1,0 +1,36 @@
+# .github/workflows/capyshield.yml
+name: supply-chain
+on: [push, pull_request]
+jobs:
+  guard-and-vex:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: capyshield/capyshield/action@v1
+
+      # Fails with exit code 2 if an install script tries to reach a host outside
+      # the allowlist or sends a secret (e.g. NPM_TOKEN, GITHUB_TOKEN) anywhere it shouldn't.
+      - run: capyshield guard --config capyshield.yaml --report egress.json -- npm ci
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          format: json
+          output: trivy-report.json
+
+      # Exit code 3 only when a high/critical CVE is actually reachable from production code.
+      - run: |
+          capyshield vex --input trivy-report.json --repo . \
+            --output release.openvex.json --summary vex-summary.md --fail-on high,critical
+      - if: always()
+        run: cat vex-summary.md >> "$GITHUB_STEP_SUMMARY"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capyshield
+          path: |
+            egress.json
+            release.openvex.json
+            vex-summary.md
