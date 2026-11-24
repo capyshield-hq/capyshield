@@ -1,0 +1,284 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "urn:capyshield:vex:sha256:77a1ca9971b54ef5f6c47f3693bef4d42aa2390a1d7d2ce6155c9df539df30b6",
+  "author": "capyshield",
+  "statements": [
+    {
+      "impact_statement": "Declared dependency that no production source file imports (static import analysis).",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "products": [
+        {
+          "@id": "pkg:npm/node-fetch@2.6.0"
+        }
+      ],
+      "status": "not_affected",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=direct imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2020-15168"
+      }
+    },
+    {
+      "action_statement": "Upgrade lodash to 4.17.21 or later.",
+      "products": [
+        {
+          "@id": "pkg:npm/lodash@4.17.20"
+        }
+      ],
+      "status": "affected",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=direct imported_in_prod=true matched_files_count=1",
+      "vulnerability": {
+        "name": "CVE-2020-28500"
+      }
+    },
+    {
+      "action_statement": "Upgrade lodash to 4.17.21 or later.",
+      "products": [
+        {
+          "@id": "pkg:npm/lodash@4.17.20"
+        }
+      ],
+      "status": "affected",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=direct imported_in_prod=true matched_files_count=1",
+      "vulnerability": {
+        "name": "CVE-2021-23337"
+      }
+    },
+    {
+      "impact_statement": "Declared dependency that no production source file imports (static import analysis).",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "products": [
+        {
+          "@id": "pkg:npm/node-fetch@2.6.0"
+        }
+      ],
+      "status": "not_affected",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=direct imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2022-0235"
+      }
+    },
+    {
+      "products": [
+        {
+          "@id": "pkg:npm/qs@6.7.0"
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=transitive imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2022-24999"
+      }
+    },
+    {
+      "action_statement": "Upgrade express to 4.19.2, 5.0.0-beta.3 or later.",
+      "products": [
+        {
+          "@id": "pkg:npm/express@4.17.1"
+        }
+      ],
+      "status": "affected",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=direct imported_in_prod=true matched_files_count=1",
+      "vulnerability": {
+        "name": "CVE-2024-29041"
+      }
+    },
+    {
+      "action_statement": "Upgrade express to 4.20.0, 5.0.0 or later.",
+      "products": [
+        {
+          "@id": "pkg:npm/express@4.17.1"
+        }
+      ],
+      "status": "affected",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=direct imported_in_prod=true matched_files_count=1",
+      "vulnerability": {
+        "name": "CVE-2024-43796"
+      }
+    },
+    {
+      "products": [
+        {
+          "@id": "pkg:npm/send@0.17.1"
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=transitive imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2024-43799"
+      }
+    },
+    {
+      "products": [
+        {
+          "@id": "pkg:npm/serve-static@1.14.1"
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=transitive imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2024-43800"
+      }
+    },
+    {
+      "products": [
+        {
+          "@id": "pkg:npm/path-to-regexp@0.1.7"
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=transitive imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2024-45296"
+      }
+    },
+    {
+      "products": [
+        {
+          "@id": "pkg:npm/body-parser@1.19.0"
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=transitive imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2024-45590"
+      }
+    },
+    {
+      "products": [
+        {
+          "@id": "pkg:npm/cookie@0.4.0"
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=transitive imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2024-47764"
+      }
+    },
+    {
+      "products": [
+        {
+          "@id": "pkg:npm/path-to-regexp@0.1.7"
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=transitive imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2024-52798"
+      }
+    },
+    {
+      "action_statement": "Upgrade lodash to 4.17.23 or later.",
+      "products": [
+        {
+          "@id": "pkg:npm/lodash@4.17.20"
+        }
+      ],
+      "status": "affected",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=direct imported_in_prod=true matched_files_count=1",
+      "vulnerability": {
+        "name": "CVE-2025-13465"
+      }
+    },
+    {
+      "products": [
+        {
+          "@id": "pkg:npm/qs@6.7.0"
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=transitive imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2025-15284"
+      }
+    },
+    {
+      "products": [
+        {
+          "@id": "pkg:npm/qs@6.7.0"
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=transitive imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2026-110816"
+      }
+    },
+    {
+      "products": [
+        {
+          "@id": "pkg:npm/body-parser@1.19.0"
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=transitive imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2026-111181"
+      }
+    },
+    {
+      "products": [
+        {
+          "@id": "pkg:npm/body-parser@1.19.0"
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=transitive imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2026-12590"
+      }
+    },
+    {
+      "products": [
+        {
+          "@id": "pkg:npm/qs@6.7.0"
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=transitive imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2026-2391"
+      }
+    },
+    {
+      "action_statement": "Upgrade lodash to 4.18.0 or later.",
+      "products": [
+        {
+          "@id": "pkg:npm/lodash@4.17.20"
+        }
+      ],
+      "status": "affected",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=direct imported_in_prod=true matched_files_count=1",
+      "vulnerability": {
+        "name": "CVE-2026-4800"
+      }
+    },
+    {
+      "products": [
+        {
+          "@id": "pkg:npm/path-to-regexp@0.1.7"
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=transitive imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2026-4867"
+      }
+    },
+    {
+      "products": [
+        {
+          "@id": "pkg:npm/qs@6.7.0"
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "capyshield reachability: in_lockfile=true dependency_scope=transitive imported_in_prod=false matched_files_count=0",
+      "vulnerability": {
+        "name": "CVE-2026-82417"
+      }
+    }
+  ],
+  "timestamp": "2025-11-25T00:00:00Z",
+  "tooling": "capyshield/0.1.0",
+  "version": 1
+}

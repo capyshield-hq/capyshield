@@ -305,7 +305,7 @@ ENTRYPOINT ["capyshield", "guard", "--config", "/app/capyshield.yaml", "--"]
 CMD ["node", "server.js"]
 ```
 
-Complete examples are in [`examples/`](examples/).
+Complete examples are in [`examples/`](examples/). To see what each command outputs without running it, see [`examples/sample-output/`](examples/sample-output/): real terminal captures, reports, OpenVEX and a redacted sync payload.
 
 ## Exit codes
 
