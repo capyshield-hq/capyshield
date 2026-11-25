@@ -58,6 +58,7 @@ Add a row to `crates/capyshield-scanner/src/patterns.rs`:
 brew install vhs
 cargo build --release
 vhs docs/demo.tape
+vhs docs/demo-vex.tape     # VEX demo; uses the trimmed Trivy report in docs/demo/
 ```
 
 - **What runs off-camera:** a hidden setup block puts `target/release` on `PATH`, uses a throwaway `HOME` (with a CA from `capyshield init`) and a fresh npm cache, and exports AWS's documented fake `EXAMPLE` key. No personal paths or real secrets appear.

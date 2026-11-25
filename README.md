@@ -24,39 +24,72 @@ One static Rust binary. Runs locally. No account, no telemetry.
 
 ---
 
+## Why
+
+The easiest ways to lose a credential today don't involve your own code:
+
+- **Install scripts.** `npm install`, `pip install` and `cargo build` run code from hundreds of packages you didn't write. A compromised install script can read your environment and send your tokens anywhere.
+- **AI agents.** Coding agents and MCP servers read untrusted text (issues, web pages, READMEs). A prompt injection hidden in that text can tell the agent to `curl` your `.env` to a stranger.
+
+Meanwhile, vulnerability scanners flag every CVE in your lockfile, whether your code can reach it or not.
+
 CapyShield is a single static Rust binary with two jobs:
 
 - **Egress firewall.** An application-level, zero-trust egress firewall: it wraps any command (`npm install`, `pip install`, `cargo build`, a coding agent, an MCP server) and records every outbound connection. When you enforce a policy, it blocks credential and ENV-secret leaks and connections to hosts you haven't allowed.
-- **VEX & reachability.** It takes a Trivy or Grype report and checks each finding against your lockfiles and production imports. It writes standard **OpenVEX**, so your scanner, auditors and customers stop chasing CVEs your code never reaches.
+- **VEX & reachability.** It takes a Trivy or Grype report and checks each finding against your lockfiles and production imports. It writes the result as standard **OpenVEX**, an open format for stating which CVEs actually affect your software, so scanners like Trivy and Grype can hide the rest. Your team, auditors and customers stop chasing CVEs your code never reaches.
 
 It runs entirely on your machine. There's no account, no API key, and no telemetry. Source code, git history and secret values never leave the host.
 
-```console
-$ capyshield watch -- npm install
-capyshield: audit mode, sni TLS, 1 sensitive ENV value(s) fingerprinted, proxy http://127.0.0.1:60597
-added 1 package in 487ms
+### What it found on a real project
 
-ACTION   DESTINATION              PROTOCOL   CONNS       SENT  RULE
-allowed  registry.npmjs.org:443   https-sni      2     4.6 KB
-capyshield: 2 connection(s) to 1 host(s)
+An unmodified run against a production pnpm/Turborepo monorepo (7 apps):
+
+```console
+$ capyshield watch -- pnpm install --frozen-lockfile        # cold store
+ACTION   DESTINATION                                PROTOCOL   CONNS       SENT  RULE
+allowed  github.com:443                             https-sni      1     1.9 KB
+allowed  registry.npmjs.org:443                     https-sni   2791     5.3 MB
+allowed  release-assets.githubusercontent.com:443   https-sni      1     2.8 KB
+capyshield: 2793 connection(s) to 3 host(s)
 ```
 
-## Contents
+One dependency's install script quietly downloaded a binary from GitHub releases. Then the build, guarded by the allowlist generated from that install (`--emit-policy`), tried to reach a host the install never needed:
 
-- [Installation](#installation)
-- [Quickstart](#quickstart)
-- [Command reference](#command-reference)
-- [Egress guard](#egress-guard)
-- [VEX & reachability](#vex--reachability)
-- [Configuration](#configuration)
-- [Integrations](#integrations)
-- [Exit codes](#exit-codes)
-- [Environment variables](#environment-variables)
-- [Privacy](#privacy)
-- [Performance](#performance)
-- [Security model & limitations](#security-model--limitations)
-- [How it works (architecture & diagrams)](https://github.com/capyshield-hq/capyshield/blob/main/docs/how-it-works.md)
-- [Contributing](#contributing)
+```console
+$ capyshield guard --config allow.yaml -- pnpm build
+ACTION   DESTINATION                PROTOCOL   CONNS       SENT  RULE
+blocked  telemetry.vercel.com:443   connect        4        0 B  disallowed_host:not_in_allow_hosts
+capyshield: 4 connection(s) to 1 host(s)
+```
+
+That was build telemetry. Decrypting it with `--tls mitm` showed that none of the project's `.env.local` values were in the payload. Most egress isn't an attack, but now you know exactly what leaves, and you decide.
+
+### Cut CVE noise down to what your code reaches
+
+<img src="https://raw.githubusercontent.com/capyshield-hq/capyshield/main/docs/demo-vex.gif" alt="capyshield vex turning 22 Trivy findings into 6 affected, 2 not affected and 14 to review, exiting 3 on high severity" width="860">
+
+Trivy reported **22 CVEs** for this demo project. `capyshield vex` shows that **6 are reachable** from production code, **2 are not** (their package is only imported by tests), and **14** are transitive and need review. It writes all of this as an OpenVEX file. Feed that file back to Trivy (`trivy --vex release.openvex.json`) and the findings that don't apply disappear from its report.
+
+To see what every command outputs without installing anything, browse the [sample output](https://github.com/capyshield-hq/capyshield/tree/main/examples/sample-output).
+
+### Who it's for
+
+| You are | Use it to | Start here |
+|---|---|---|
+| **Platform / DevSecOps** | Block secret exfiltration in CI installs and builds, and ship OpenVEX with every release | [GitHub Actions example](https://github.com/capyshield-hq/capyshield/tree/main/examples/github-actions) |
+| **Building with AI agents or MCP** | Wrap Claude Code, Cursor agents or MCP servers so a prompt injection can't send your `.env` out | [Claude Code / MCP example](https://github.com/capyshield-hq/capyshield/tree/main/examples/claude-code) |
+| **Maintaining a project** | See what your install and build talk to, then turn that into a policy | `uvx capyshield watch --emit-policy allow.yaml -- <build>` |
+
+### How it compares
+
+These tools complement each other. Here is where each one fits:
+
+| Tool | Runs where | Approach | Best at |
+|---|---|---|---|
+| **CapyShield** | Any terminal, any CI, around AI agents | Per-command egress proxy with policy-as-code, plus OpenVEX reachability triage | Catching secrets leaving one command; cutting CVE noise |
+| StepSecurity Harden-Runner | GitHub Actions runners | Runner-level egress monitoring and blocking | Locking down GitHub-hosted CI |
+| Socket.dev | Dependency review (PRs, CLI) | Analysing packages for risky behaviour before install | Catching malicious packages early |
+| OpenSnitch / Little Snitch | Your desktop OS | Interactive per-process firewall | System-wide control of every app |
 
 ## Installation
 
@@ -85,6 +118,14 @@ gh attestation verify capyshield-x86_64-unknown-linux-musl.tar.gz --repo capyshi
 ```
 
 ## Quickstart
+
+No install needed: run it straight from PyPI or npm.
+
+```bash
+uvx capyshield watch -- npm install      # or: npx capyshield watch -- npm install
+```
+
+The full loop, once installed:
 
 ```bash
 # 1. See what a command talks to. Zero config, nothing blocked.
@@ -370,6 +411,8 @@ This repository is the complete, standalone data plane, and is free under Apache
 - executive PDF reports and protected share links
 - centralized agent policy, with human-in-the-loop quarantine through Slack or Teams
 - a long-term immutable audit log
+
+Want CapyShield for your team? Learn more at [capyshield.com](https://capyshield.com).
 
 ## Contributing
 
