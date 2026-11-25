@@ -18,7 +18,7 @@ One static Rust binary. Runs locally. No account, no telemetry.
 
 [Install](#installation) · [Quickstart](#quickstart) · [Egress guard](#egress-guard) · [VEX & reachability](#vex--reachability) · [Configuration](#configuration) · [CI & agents](#integrations)
 
-<img src="https://raw.githubusercontent.com/capyshield-hq/capyshield/main/docs/demo-agent.gif" alt="Without CapyShield the agent sends the prod DB password (HTTP 200); with capyshield guard the same request is blocked (HTTP 403, exit code 2)" width="860">
+<img src="https://raw.githubusercontent.com/capyshield-hq/capyshield/main/docs/demos/agent.gif" alt="Without CapyShield the agent sends the prod DB password (HTTP 200); with capyshield guard the same request is blocked (HTTP 403, exit code 2)" width="860">
 
 </div>
 
@@ -66,7 +66,7 @@ That was build telemetry. Decrypting it with `--tls mitm` showed that none of th
 
 ### Stop an agent from leaking a secret
 
-The demo at the top: the same request to a coding agent, without and with CapyShield. The agent is a stand-in script ([`docs/demo/agent.sh`](https://github.com/capyshield-hq/capyshield/blob/main/docs/demo/agent.sh)), but its tool call, the network request and the block are all real.
+The demo at the top: the same request to a coding agent, without and with CapyShield. The agent is a stand-in script ([`docs/demos/fixtures/agent.sh`](https://github.com/capyshield-hq/capyshield/blob/main/docs/demos/fixtures/agent.sh)), but its tool call, the network request and the block are all real.
 
 **Without CapyShield:** the password leaves (`HTTP 200`). **With it:** CapyShield recognizes the value of `DB_PASSWORD` in the request, blocks it (`HTTP 403`) and exits with code 2, so CI fails loudly. The agent didn't change at all.
 
@@ -74,7 +74,7 @@ Careful agents may refuse requests like this; in our tests Claude Code did. Capy
 
 ### Cut CVE noise down to what your code reaches
 
-<img src="https://raw.githubusercontent.com/capyshield-hq/capyshield/main/docs/demo-vex.gif" alt="capyshield vex turning 22 Trivy findings into 6 affected, 2 not affected and 14 to review, exiting 3 on high severity" width="860">
+<img src="https://raw.githubusercontent.com/capyshield-hq/capyshield/main/docs/demos/vex.gif" alt="capyshield vex turning 22 Trivy findings into 6 affected, 2 not affected and 14 to review, exiting 3 on high severity" width="860">
 
 Trivy reported **22 CVEs** for this demo project. `capyshield vex` shows that **6 are reachable** from production code, **2 are not** (their package is only imported by tests), and **14** are transitive and need review. It writes all of this as an OpenVEX file. Feed that file back to Trivy (`trivy --vex release.openvex.json`) and the findings that don't apply disappear from its report.
 
@@ -171,7 +171,7 @@ CLI flags override the config file: `--mode`, `--fail-mode` and `--tls` win over
 
 `watch` and `guard` start a local proxy on `127.0.0.1` and run your command with `HTTP_PROXY`, `HTTPS_PROXY` and `ALL_PROXY` (upper and lower case) pointing at it. Every connection is recorded with `timestamp`, `destination_host`, `port`, `protocol`, `bytes_sent`, `action` (`allowed` | `blocked` | `audited`) and `rule_id`. Add `--report events.json` to save the log.
 
-<img src="https://raw.githubusercontent.com/capyshield-hq/capyshield/main/docs/demo.gif" alt="capyshield watching npm install, then blocking an AWS secret exfiltration with exit code 2" width="760">
+<img src="https://raw.githubusercontent.com/capyshield-hq/capyshield/main/docs/demos/watch.gif" alt="capyshield watching npm install, then blocking an AWS secret exfiltration with exit code 2" width="760">
 
 ```mermaid
 flowchart LR
@@ -430,12 +430,12 @@ Contributions are welcome. See [CONTRIBUTING.md](https://github.com/capyshield-h
 
 ### Regenerating the demo GIF
 
-The terminal recording at the top of this README is scripted in [`docs/demo.tape`](https://github.com/capyshield-hq/capyshield/blob/main/docs/demo.tape) and rendered with [VHS](https://github.com/charmbracelet/vhs). To re-record it after the CLI output changes, run this from the repository root (it needs network access for npm and httpbin.org):
+The terminal recording at the top of this README is scripted in [`docs/demos/watch.tape`](https://github.com/capyshield-hq/capyshield/blob/main/docs/demos/watch.tape) and rendered with [VHS](https://github.com/charmbracelet/vhs). To re-record it after the CLI output changes, run this from the repository root (it needs network access for npm and httpbin.org):
 
 ```bash
 brew install vhs            # or see the VHS README for Linux packages
 cargo build --release       # the tape runs ./target/release/capyshield
-vhs docs/demo.tape          # writes docs/demo.gif
+vhs docs/demos/watch.tape          # writes docs/demos/watch.gif
 ```
 
 ```text

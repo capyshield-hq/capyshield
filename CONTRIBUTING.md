@@ -52,20 +52,22 @@ Add a row to `crates/capyshield-scanner/src/patterns.rs`:
 
 ## Demo GIF
 
-`docs/demo.gif` (shown at the top of the README) is rendered from `docs/demo.tape` with [VHS](https://github.com/charmbracelet/vhs):
+`docs/demos/watch.gif` (shown at the top of the README) is rendered from `docs/demos/watch.tape` with [VHS](https://github.com/charmbracelet/vhs):
 
 ```bash
 brew install vhs
 cargo build --release
-vhs docs/demo.tape
-vhs docs/demo-agent.tape   # AI-agent before/after demo
-vhs docs/demo-vex.tape     # VEX demo; uses the trimmed Trivy report in docs/demo/
+vhs docs/demos/watch.tape
+vhs docs/demos/agent.tape   # AI-agent before/after demo
+vhs docs/demos/vex.tape     # VEX demo; uses the trimmed Trivy report in docs/demos/fixtures/
 ```
 
 - **What runs off-camera:** a hidden setup block puts `target/release` on `PATH`, uses a throwaway `HOME` (with a CA from `capyshield init`) and a fresh npm cache, and exports AWS's documented fake `EXAMPLE` key. No personal paths or real secrets appear.
 - **Network:** the recording makes real requests to `registry.npmjs.org` and `httpbin.org`.
-- **When to re-record:** whenever `watch`/`guard` terminal output changes. Check a few frames before committing, for example `ffmpeg -sseof -0.2 -i docs/demo.gif -frames:v 1 last.png`.
+- **When to re-record:** whenever `watch`/`guard` terminal output changes. Check a few frames before committing, for example `ffmpeg -sseof -0.2 -i docs/demos/watch.gif -frames:v 1 last.png`.
 - **Size:** keep the GIF under the 512 KB `check-added-large-files` limit. The current one is about 210 KB.
+
+> `docs/demo.gif` is a compatibility copy of `docs/demos/watch.gif`: the v0.1.2 README published on PyPI, npm and crates.io embeds it by URL. Delete it once v0.1.3 is released.
 
 ## Packaging
 

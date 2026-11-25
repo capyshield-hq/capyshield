@@ -1,7 +1,7 @@
 # AI-agent demo for the README: the same agent request without and with CapyShield.
-# Render from the repo root (needs network):  cargo build --release && vhs docs/demo-agent.tape
-# docs/demo/agent.sh is a stand-in agent that really runs its tool call; the password is fake.
-Output docs/demo-agent.gif
+# Render from the repo root (needs network):  cargo build --release && vhs docs/demos/agent.tape
+# docs/demos/fixtures/agent.sh is a stand-in agent that really runs its tool call; the password is fake.
+Output docs/demos/agent.gif
 
 Set Shell "bash"
 Set FontSize 14
@@ -12,7 +12,7 @@ Set Theme "Catppuccin Mocha"
 Set TypingSpeed 30ms
 
 Hide
-Type `export PATH="$PWD/target/release:$PWD/docs/demo:$PATH" HOME="$(mktemp -d)" PS1='$ ' && (cd "$(mktemp -d)" && capyshield init >/dev/null 2>&1)`
+Type `export PATH="$PWD/target/release:$PWD/docs/demos/fixtures:$PATH" HOME="$(mktemp -d)" PS1='$ ' && (cd "$(mktemp -d)" && capyshield init >/dev/null 2>&1)`
 Enter
 Type `alias agent=agent.sh && export DB_PASSWORD='pr0d-Db-pa55w0rd-2026' && cd "$(mktemp -d)" && clear`
 Enter
