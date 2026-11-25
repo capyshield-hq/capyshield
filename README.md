@@ -4,9 +4,9 @@
 
 # CapyShield
 
-**A deterministic, zero-trust egress guard and local VEX/reachability engine.**
+**Egress firewall and secret-leak guard for builds, CI and AI agents, plus local CVE reachability that cuts scanner noise to OpenVEX.**
 
-Stop secrets from leaving your build, CI or AI agent, and cut CVE noise down to what your code actually reaches.
+One static Rust binary. Runs locally. No account, no telemetry.
 
 [![CI](https://github.com/capyshield-hq/capyshield/actions/workflows/ci.yml/badge.svg)](https://github.com/capyshield-hq/capyshield/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/capyshield-hq/capyshield?logo=github&color=24292f)](https://github.com/capyshield-hq/capyshield/releases)
@@ -25,7 +25,7 @@ Stop secrets from leaving your build, CI or AI agent, and cut CVE noise down to 
 
 CapyShield is a single static Rust binary with two jobs:
 
-- **Egress guard.** It wraps any command (`npm install`, `pip install`, `cargo build`, a coding agent, an MCP server) and records every outbound connection. When you enforce a policy, it blocks credential and ENV-secret leaks and connections to hosts you haven't allowed.
+- **Egress firewall.** An application-level, zero-trust egress firewall: it wraps any command (`npm install`, `pip install`, `cargo build`, a coding agent, an MCP server) and records every outbound connection. When you enforce a policy, it blocks credential and ENV-secret leaks and connections to hosts you haven't allowed.
 - **VEX & reachability.** It takes a Trivy or Grype report and checks each finding against your lockfiles and production imports. It writes standard **OpenVEX**, so your scanner, auditors and customers stop chasing CVEs your code never reaches.
 
 It runs entirely on your machine. There's no account, no API key, and no telemetry. Source code, git history and secret values never leave the host.
@@ -354,7 +354,7 @@ Full inspection means the host policy check plus pattern, ENV, PII and entropy s
 
 ## Security model & limitations
 
-- **The proxy is cooperative.** It reliably covers tools that honor proxy variables: npm, pip, uv, curl, git, most SDKs and agent runtimes. Code that deliberately opens raw sockets can bypass it. For a hard boundary, run the command in a container or network namespace whose only way out is the CapyShield proxy.
+- **It's an application-level firewall, not a network one.** The proxy is cooperative: it reliably covers tools that honor proxy variables: npm, pip, uv, curl, git, most SDKs and agent runtimes. Code that deliberately opens raw sockets can bypass it. For a hard boundary, run the command in a container or network namespace whose only way out is the CapyShield proxy.
 - **Reachability is static and package-level** ([details](https://github.com/capyshield-hq/capyshield/blob/main/docs/how-it-works.md#triage-decision)). It uses lockfiles and import statements, not call graphs. Transitive dependencies that aren't imported directly are reported as `under_investigation` rather than guessed. Record your own triage decisions as local VEX rules.
 - **Payload inspection over HTTPS needs `mitm`.** In `sni` mode, the policy is enforced on hosts and byte counts only.
 
