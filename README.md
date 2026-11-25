@@ -4,7 +4,8 @@
 
 # CapyShield
 
-**Egress firewall and secret-leak guard for builds, CI and AI agents, plus local CVE reachability that cuts scanner noise to OpenVEX.**
+**Egress firewall and secret-leak guard for builds, CI and AI agents,**<br>
+**plus local CVE reachability that cuts scanner noise to OpenVEX.**
 
 One static Rust binary. Runs locally. No account, no telemetry.
 
