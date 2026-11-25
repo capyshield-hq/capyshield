@@ -1,8 +1,8 @@
 # VEX demo for the README. Render from the repo root:
-#   cargo build --release && vhs docs/demo-vex.tape
-# Uses the trimmed Trivy report in docs/demo/; the demo project is generated off-camera
+#   cargo build --release && vhs docs/demos/vex.tape
+# Uses the trimmed Trivy report in docs/demos/fixtures/; the demo project is generated off-camera
 # (a committed package.json with vulnerable versions would trigger Dependabot alerts).
-Output docs/demo-vex.gif
+Output docs/demos/vex.gif
 
 Set Shell "bash"
 Set FontSize 14
@@ -13,7 +13,7 @@ Set Theme "Catppuccin Mocha"
 Set TypingSpeed 35ms
 
 Hide
-Type `export PATH="$PWD/target/release:$PATH" NO_COLOR= PS1='$ ' R="$PWD/docs/demo/trivy-report.json"`
+Type `export PATH="$PWD/target/release:$PATH" NO_COLOR= PS1='$ ' R="$PWD/docs/demos/fixtures/trivy-report.json"`
 Enter
 Type `cd "$(mktemp -d)" && mkdir src test && cp "$R" trivy-report.json`
 Enter

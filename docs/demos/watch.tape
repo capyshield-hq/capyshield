@@ -1,8 +1,8 @@
 # Terminal demo for the README. Render from the repo root (needs network):
-#   cargo build --release && vhs docs/demo.tape
-# Output: docs/demo.gif
+#   cargo build --release && vhs docs/demos/watch.tape
+# Output: docs/demos/watch.gif
 
-Output docs/demo.gif
+Output docs/demos/watch.gif
 
 Set Shell "bash"
 Set FontSize 14
