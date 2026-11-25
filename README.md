@@ -64,6 +64,16 @@ capyshield: 4 connection(s) to 1 host(s)
 
 That was build telemetry. Decrypting it with `--tls mitm` showed that none of the project's `.env.local` values were in the payload. Most egress isn't an attack, but now you know exactly what leaves, and you decide.
 
+### Stop an agent from leaking a secret
+
+The same request to a coding agent, without and with CapyShield. The agent is a stand-in script ([`docs/demo/agent.sh`](https://github.com/capyshield-hq/capyshield/blob/main/docs/demo/agent.sh)), but its tool call, the network request and the block are all real:
+
+<img src="https://raw.githubusercontent.com/capyshield-hq/capyshield/main/docs/demo-agent.gif" alt="Without CapyShield the agent sends the prod DB password (HTTP 200); with capyshield guard the same request is blocked (HTTP 403, exit code 2)" width="860">
+
+**Without CapyShield:** the password leaves (`HTTP 200`). **With it:** CapyShield recognizes the value of `DB_PASSWORD` in the request, blocks it (`HTTP 403`) and exits with code 2, so CI fails loudly. The agent didn't change at all.
+
+Careful agents may refuse requests like this; in our tests Claude Code did. CapyShield doesn't rely on the model's judgment: the block is deterministic. Wrapping Claude Code or an MCP server is one command; see the [Claude Code / MCP example](https://github.com/capyshield-hq/capyshield/tree/main/examples/claude-code).
+
 ### Cut CVE noise down to what your code reaches
 
 <img src="https://raw.githubusercontent.com/capyshield-hq/capyshield/main/docs/demo-vex.gif" alt="capyshield vex turning 22 Trivy findings into 6 affected, 2 not affected and 14 to review, exiting 3 on high severity" width="860">
