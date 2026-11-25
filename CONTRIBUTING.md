@@ -58,6 +58,7 @@ Add a row to `crates/capyshield-scanner/src/patterns.rs`:
 brew install vhs
 cargo build --release
 vhs docs/demo.tape
+vhs docs/demo-agent.tape   # AI-agent before/after demo
 vhs docs/demo-vex.tape     # VEX demo; uses the trimmed Trivy report in docs/demo/
 ```
 
