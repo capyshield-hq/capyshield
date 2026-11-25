@@ -1,0 +1,278 @@
+{
+ "SchemaVersion": 2,
+ "ArtifactName": "demo",
+ "ArtifactType": "filesystem",
+ "Results": [
+  {
+   "Target": "package-lock.json",
+   "Class": "lang-pkgs",
+   "Type": "npm",
+   "Vulnerabilities": [
+    {
+     "VulnerabilityID": "CVE-2024-45590",
+     "PkgName": "body-parser",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/body-parser@1.19.0",
+      "UID": "31e0e58980761f2f"
+     },
+     "InstalledVersion": "1.19.0",
+     "FixedVersion": "1.20.3",
+     "Severity": "HIGH",
+     "Title": "body-parser: Denial of Service Vulnerability in body-parser"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-111181",
+     "PkgName": "body-parser",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/body-parser@1.19.0",
+      "UID": "31e0e58980761f2f"
+     },
+     "InstalledVersion": "1.19.0",
+     "FixedVersion": "2.4.0, 1.20.9",
+     "Severity": "HIGH",
+     "Title": "body-parser: body-parser: Denial of Service via unhandled decompression stream error"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-12590",
+     "PkgName": "body-parser",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/body-parser@1.19.0",
+      "UID": "31e0e58980761f2f"
+     },
+     "InstalledVersion": "1.19.0",
+     "FixedVersion": "1.20.6, 2.3.0",
+     "Severity": "LOW",
+     "Title": "body-parser: body-parser: Denial of Service via invalid limit option"
+    },
+    {
+     "VulnerabilityID": "CVE-2024-47764",
+     "PkgName": "cookie",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/cookie@0.4.0",
+      "UID": "8845819ea01f7b77"
+     },
+     "InstalledVersion": "0.4.0",
+     "FixedVersion": "0.7.0",
+     "Severity": "LOW",
+     "Title": "cookie: cookie accepts cookie name, path, and domain with out of bounds characters"
+    },
+    {
+     "VulnerabilityID": "CVE-2024-29041",
+     "PkgName": "express",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/express@4.17.1",
+      "UID": "9917b8e4022cd6d9"
+     },
+     "InstalledVersion": "4.17.1",
+     "FixedVersion": "4.19.2, 5.0.0-beta.3",
+     "Severity": "MEDIUM",
+     "Title": "express: cause malformed URLs to be evaluated"
+    },
+    {
+     "VulnerabilityID": "CVE-2024-43796",
+     "PkgName": "express",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/express@4.17.1",
+      "UID": "9917b8e4022cd6d9"
+     },
+     "InstalledVersion": "4.17.1",
+     "FixedVersion": "4.20.0, 5.0.0",
+     "Severity": "LOW",
+     "Title": "express: Improper Input Handling in Express Redirects"
+    },
+    {
+     "VulnerabilityID": "CVE-2021-23337",
+     "PkgName": "lodash",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/lodash@4.17.20",
+      "UID": "3e7ac707f0dfe8a0"
+     },
+     "InstalledVersion": "4.17.20",
+     "FixedVersion": "4.17.21",
+     "Severity": "HIGH",
+     "Title": "nodejs-lodash: command injection via template"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-4800",
+     "PkgName": "lodash",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/lodash@4.17.20",
+      "UID": "3e7ac707f0dfe8a0"
+     },
+     "InstalledVersion": "4.17.20",
+     "FixedVersion": "4.18.0",
+     "Severity": "HIGH",
+     "Title": "lodash: lodash: Arbitrary code execution via untrusted input in template imports"
+    },
+    {
+     "VulnerabilityID": "CVE-2020-28500",
+     "PkgName": "lodash",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/lodash@4.17.20",
+      "UID": "3e7ac707f0dfe8a0"
+     },
+     "InstalledVersion": "4.17.20",
+     "FixedVersion": "4.17.21",
+     "Severity": "MEDIUM",
+     "Title": "nodejs-lodash: ReDoS via the toNumber, trim and trimEnd functions"
+    },
+    {
+     "VulnerabilityID": "CVE-2025-13465",
+     "PkgName": "lodash",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/lodash@4.17.20",
+      "UID": "3e7ac707f0dfe8a0"
+     },
+     "InstalledVersion": "4.17.20",
+     "FixedVersion": "4.17.23",
+     "Severity": "MEDIUM",
+     "Title": "lodash: prototype pollution in _.unset and _.omit functions"
+    },
+    {
+     "VulnerabilityID": "CVE-2022-0235",
+     "PkgName": "node-fetch",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/node-fetch@2.6.0",
+      "UID": "6427878d511b20ad"
+     },
+     "InstalledVersion": "2.6.0",
+     "FixedVersion": "3.1.1, 2.6.7",
+     "Severity": "HIGH",
+     "Title": "node-fetch: exposure of sensitive information to an unauthorized actor"
+    },
+    {
+     "VulnerabilityID": "CVE-2020-15168",
+     "PkgName": "node-fetch",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/node-fetch@2.6.0",
+      "UID": "6427878d511b20ad"
+     },
+     "InstalledVersion": "2.6.0",
+     "FixedVersion": "2.6.1, 3.0.0-beta.9",
+     "Severity": "LOW",
+     "Title": "node-fetch: size of data after fetch() JS thread leads to DoS"
+    },
+    {
+     "VulnerabilityID": "CVE-2024-45296",
+     "PkgName": "path-to-regexp",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/path-to-regexp@0.1.7",
+      "UID": "2a87acb129f889"
+     },
+     "InstalledVersion": "0.1.7",
+     "FixedVersion": "1.9.0, 0.1.10, 8.0.0, 3.3.0, 6.3.0",
+     "Severity": "HIGH",
+     "Title": "path-to-regexp: Backtracking regular expressions cause ReDoS"
+    },
+    {
+     "VulnerabilityID": "CVE-2024-52798",
+     "PkgName": "path-to-regexp",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/path-to-regexp@0.1.7",
+      "UID": "2a87acb129f889"
+     },
+     "InstalledVersion": "0.1.7",
+     "FixedVersion": "0.1.12",
+     "Severity": "HIGH",
+     "Title": "path-to-regexp: path-to-regexp Unpatched `path-to-regexp` ReDoS in 0.1.x"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-4867",
+     "PkgName": "path-to-regexp",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/path-to-regexp@0.1.7",
+      "UID": "2a87acb129f889"
+     },
+     "InstalledVersion": "0.1.7",
+     "FixedVersion": "0.1.13",
+     "Severity": "HIGH",
+     "Title": "path-to-regexp: path-to-regexp: Denial of Service via catastrophic backtracking from malformed URL parameters"
+    },
+    {
+     "VulnerabilityID": "CVE-2022-24999",
+     "PkgName": "qs",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/qs@6.7.0",
+      "UID": "6b1e61f41225bf98"
+     },
+     "InstalledVersion": "6.7.0",
+     "FixedVersion": "6.10.3, 6.9.7, 6.8.3, 6.7.3, 6.6.1, 6.5.3, 6.4.1, 6.3.3, 6.2.4",
+     "Severity": "HIGH",
+     "Title": "express: \"qs\" prototype poisoning causes the hang of the node process"
+    },
+    {
+     "VulnerabilityID": "CVE-2025-15284",
+     "PkgName": "qs",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/qs@6.7.0",
+      "UID": "6b1e61f41225bf98"
+     },
+     "InstalledVersion": "6.7.0",
+     "FixedVersion": "6.14.1",
+     "Severity": "MEDIUM",
+     "Title": "qs: qs: Denial of Service via improper input validation in array parsing"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-110816",
+     "PkgName": "qs",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/qs@6.7.0",
+      "UID": "6b1e61f41225bf98"
+     },
+     "InstalledVersion": "6.7.0",
+     "FixedVersion": "6.16.1",
+     "Severity": "MEDIUM",
+     "Title": "qs: qs: Denial of Service via unhandled exception during array serialization"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-82417",
+     "PkgName": "qs",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/qs@6.7.0",
+      "UID": "6b1e61f41225bf98"
+     },
+     "InstalledVersion": "6.7.0",
+     "FixedVersion": "6.16.0",
+     "Severity": "MEDIUM",
+     "Title": "qs: qs: Denial of Service via improper validation in stringify function"
+    },
+    {
+     "VulnerabilityID": "CVE-2026-2391",
+     "PkgName": "qs",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/qs@6.7.0",
+      "UID": "6b1e61f41225bf98"
+     },
+     "InstalledVersion": "6.7.0",
+     "FixedVersion": "6.14.2",
+     "Severity": "LOW",
+     "Title": "qs: qs's arrayLimit bypass in comma parsing allows denial of service"
+    },
+    {
+     "VulnerabilityID": "CVE-2024-43799",
+     "PkgName": "send",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/send@0.17.1",
+      "UID": "4b734ef33c0080bc"
+     },
+     "InstalledVersion": "0.17.1",
+     "FixedVersion": "0.19.0",
+     "Severity": "LOW",
+     "Title": "send: Code Execution Vulnerability in Send Library"
+    },
+    {
+     "VulnerabilityID": "CVE-2024-43800",
+     "PkgName": "serve-static",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/serve-static@1.14.1",
+      "UID": "41606179a572fbfe"
+     },
+     "InstalledVersion": "1.14.1",
+     "FixedVersion": "1.16.0, 2.1.0",
+     "Severity": "LOW",
+     "Title": "serve-static: Improper Sanitization in serve-static"
+    }
+   ]
+  }
+ ]
+}
