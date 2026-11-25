@@ -67,8 +67,6 @@ vhs docs/demos/vex.tape     # VEX demo; uses the trimmed Trivy report in docs/de
 - **When to re-record:** whenever `watch`/`guard` terminal output changes. Check a few frames before committing, for example `ffmpeg -sseof -0.2 -i docs/demos/watch.gif -frames:v 1 last.png`.
 - **Size:** keep the GIF under the 512 KB `check-added-large-files` limit. The current one is about 210 KB.
 
-> `docs/demo.gif` is a compatibility copy of `docs/demos/watch.gif`: the v0.1.2 README published on PyPI, npm and crates.io embeds it by URL. Delete it once v0.1.3 is released.
-
 ## Packaging
 
 The same native binary is distributed through several channels. All of them are built by `.github/workflows/release.yml` on a `v*` tag:
