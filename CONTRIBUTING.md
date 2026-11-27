@@ -6,7 +6,7 @@ Thanks for helping! Bug reports, new secret patterns, lockfile formats and docs 
 
 ```bash
 cargo build                 # debug build, binary at target/debug/capyshield
-cargo test                  # unit + proxy integration tests (no network needed)
+cargo test                  # all tests, in each crate's tests/ folder (no network needed)
 cargo build --release       # optimized static-ish binary
 ```
 
@@ -82,6 +82,7 @@ The same native binary is distributed through several channels. All of them are 
 ## Pull requests
 
 - Keep changes focused and covered by a test when they change behavior.
+- Tests live in each crate's `tests/` folder (no inline `#[cfg(test)]` modules). They test the public API; the binary's pure helpers live in `crates/capyshield-cli/src/lib.rs` for that reason.
 - `cargo test` and `pre-commit run --all-files` must pass.
 - Never commit real credentials, not even revoked ones; use obviously fake values like `AKIAIOSFODNN7EXAMPLE`.
 - By contributing you agree that your work is licensed under the Apache License 2.0.

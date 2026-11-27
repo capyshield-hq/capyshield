@@ -1,5 +1,6 @@
 //! Optional CapyShield Cloud client. Only used when the user passes `--sync` and a token is set;
-//! nothing here runs otherwise. Payloads are metadata only (ids, purls, reachability facts).
+//! nothing here runs otherwise. Payloads are metadata only (ids, purls, reachability facts,
+//! blocked host/port/rule counts), never request bodies or ENV values.
 
 use bytes::Bytes;
 use http_body_util::{BodyExt, Full};
@@ -9,6 +10,8 @@ use serde_json::Value;
 use std::sync::Arc;
 use tokio::net::TcpStream;
 
+/// ENV names that hold the Cloud token; `guard`/`watch` strip them from the wrapped command.
+pub const TOKEN_VARS: [&str; 2] = ["CAPYSHIELD_TOKEN", "CAPYSHIELD_API_KEY"];
 pub const DEFAULT_API: &str = "https://api.capyshield.com";
 pub const MAX_PAYLOAD_BYTES: usize = 500 * 1024;
 
@@ -22,10 +25,7 @@ pub struct Client {
 impl Client {
     /// `CAPYSHIELD_TOKEN` (or `CAPYSHIELD_API_KEY`), endpoint override via `CAPYSHIELD_API_URL`.
     pub fn from_env() -> Option<Client> {
-        let token = std::env::var("CAPYSHIELD_TOKEN")
-            .or_else(|_| std::env::var("CAPYSHIELD_API_KEY"))
-            .ok()
-            .filter(|t| !t.is_empty())?;
+        let token = TOKEN_VARS.iter().find_map(|k| std::env::var(k).ok().filter(|t| !t.is_empty()))?;
         let base = std::env::var("CAPYSHIELD_API_URL").unwrap_or_else(|_| DEFAULT_API.into());
         Some(Client {
             base: base.trim_end_matches('/').to_string(),
@@ -39,9 +39,25 @@ impl Client {
         Ok(String::from_utf8(body.to_vec())?)
     }
 
+    /// Team egress policy for a project: `{allow_presets, allow_hosts, deny_hosts}`.
+    pub async fn pull_egress_policy(&self, project: &str) -> Result<String, BoxError> {
+        let body = self
+            .request(Method::GET, &format!("/v1/egress/policy?project={project}"), None)
+            .await?;
+        Ok(String::from_utf8(body.to_vec())?)
+    }
+
     pub async fn push_vex(&self, payload: &Value) -> Result<Value, BoxError> {
+        self.post("/v1/vex/sync", payload).await
+    }
+
+    pub async fn push_egress_report(&self, payload: &Value) -> Result<Value, BoxError> {
+        self.post("/v1/egress/report", payload).await
+    }
+
+    async fn post(&self, path: &str, payload: &Value) -> Result<Value, BoxError> {
         let body = check_size(payload)?;
-        let resp = self.request(Method::POST, "/v1/vex/sync", Some(body)).await?;
+        let resp = self.request(Method::POST, path, Some(body)).await?;
         Ok(serde_json::from_slice(&resp).unwrap_or(Value::Null))
     }
 

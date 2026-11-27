@@ -1,3 +1,4 @@
+use capyshield::{blocked_report, policy_from_events};
 use capyshield_policy::{Config, FailMode, Mode, TlsInspection};
 use capyshield_proxy::{Action, Ca, Event, Guard};
 use capyshield_scanner::Scanner;
@@ -73,6 +74,9 @@ enum Cmd {
         /// Write all connection events as JSON
         #[arg(long)]
         report: Option<PathBuf>,
+        /// Pull the team egress policy from and report blocked hosts to CapyShield Cloud (needs CAPYSHIELD_TOKEN)
+        #[arg(long)]
+        sync: bool,
         #[arg(last = true, required = true)]
         command: Vec<String>,
     },
@@ -150,8 +154,9 @@ async fn main() -> ExitCode {
             tls,
             agent_id,
             report,
+            sync,
             command,
-        } => guard(config, mode, fail_mode, tls, agent_id, report, command).await,
+        } => guard(config, mode, fail_mode, tls, agent_id, report, sync, command).await,
         Cmd::Vex {
             scanner,
             input,
@@ -221,9 +226,10 @@ async fn watch(
     cfg.mode = Mode::Audit;
     cfg.fail_mode = FailMode::FailOpen;
     parse_tls(tls, &mut cfg)?;
-    run_guarded(cfg, None, report, emit_policy, command).await
+    run_guarded(cfg, None, report, emit_policy, None, command).await
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn guard(
     config: Option<PathBuf>,
     mode: Option<String>,
@@ -231,6 +237,7 @@ async fn guard(
     tls: Option<String>,
     agent_id: Option<String>,
     report: Option<PathBuf>,
+    sync: bool,
     command: Vec<String>,
 ) -> Result<u8, String> {
     // Without a policy file, guard still enforces the builtin secret/ENV/PII checks.
@@ -257,7 +264,40 @@ async fn guard(
         Some(x) => return Err(format!("--fail-mode {x:?}: expected fail_open or fail_closed")),
     }
     parse_tls(tls, &mut cfg)?;
-    run_guarded(cfg, agent_id, report, None, command).await
+    let cloud = if sync {
+        let client = capyshield_sync::Client::from_env().ok_or("--sync needs CAPYSHIELD_TOKEN (or CAPYSHIELD_API_KEY)")?;
+        let project = project_slug(Path::new("."));
+        match client.pull_egress_policy(&project).await {
+            Ok(t) => cfg.merge_team_egress(&t).map_err(|e| format!("cloud egress policy: {e}"))?,
+            Err(e) => eprintln!("capyshield: could not pull the team egress policy ({e}); continuing with the local policy"),
+        }
+        Some((client, project))
+    } else {
+        None
+    };
+    run_guarded(cfg, agent_id, report, None, cloud, command).await
+}
+
+/// Repo directory name as a URL-safe project id.
+fn project_slug(dir: &Path) -> String {
+    let name = std::fs::canonicalize(dir)
+        .ok()
+        .and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned()))
+        .unwrap_or_else(|| "repo".into());
+    name.chars()
+        .map(|c| if c.is_ascii_alphanumeric() || "-_.".contains(c) { c } else { '-' })
+        .collect()
+}
+
+/// RFC 3339 UTC now, or SOURCE_DATE_EPOCH for reproducible output.
+fn now_rfc3339() -> String {
+    std::env::var("SOURCE_DATE_EPOCH")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .and_then(|s| time::OffsetDateTime::from_unix_timestamp(s).ok())
+        .unwrap_or_else(time::OffsetDateTime::now_utc)
+        .format(&time::format_description::well_known::Rfc3339)
+        .unwrap()
 }
 
 fn ca_dir() -> Result<PathBuf, String> {
@@ -301,6 +341,7 @@ async fn run_guarded(
     agent_id: Option<String>,
     report: Option<PathBuf>,
     emit_policy: Option<PathBuf>,
+    cloud: Option<(capyshield_sync::Client, String)>,
     command: Vec<String>,
 ) -> Result<u8, String> {
     let scanner = Scanner::new(&cfg.egress.scan, std::env::vars());
@@ -342,6 +383,10 @@ async fn run_guarded(
 
     let mut cmd = tokio::process::Command::new(&command[0]);
     cmd.args(&command[1..]);
+    // The Cloud token is ours alone: install scripts and agents never see it.
+    for k in capyshield_sync::TOKEN_VARS {
+        cmd.env_remove(k);
+    }
     if let Some(addr) = addr {
         let url = format!("http://{addr}");
         for k in ["HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy"] {
@@ -368,6 +413,18 @@ async fn run_guarded(
 
     let events = guard.events();
     print_events(&events, mitm);
+    if let Some((client, project)) = cloud {
+        let blocked = blocked_report(&events);
+        let n: usize = blocked.iter().map(|r| r["count"].as_u64().unwrap_or(0) as usize).sum();
+        let payload = json!({
+            "project": project, "generated_at": now_rfc3339(),
+            "cli_version": env!("CARGO_PKG_VERSION"), "blocked": blocked,
+        });
+        match client.push_egress_report(&payload).await {
+            Ok(_) => eprintln!("capyshield: synced {n} blocked connection(s) to CapyShield Cloud"),
+            Err(e) => eprintln!("capyshield: could not report blocked hosts to CapyShield Cloud ({e})"),
+        }
+    }
     if let Some(path) = report {
         let body = serde_json::to_string_pretty(&json!({ "events": events })).unwrap();
         std::fs::write(&path, body).map_err(|e| format!("{}: {e}", path.display()))?;
@@ -385,38 +442,6 @@ async fn run_guarded(
         return Ok(EXIT_EGRESS_VIOLATION);
     }
     Ok(status.code().map_or(EXIT_ERROR, |c| c.clamp(0, 255) as u8))
-}
-
-/// Enforce-mode policy allowing exactly the hosts seen (deny-listed ones excluded), annotated with matching presets.
-fn policy_from_events(events: &[Event]) -> String {
-    let hosts: std::collections::BTreeSet<&str> = events
-        .iter()
-        .filter(|e| !e.rule_id.as_deref().is_some_and(|r| r.starts_with("disallowed_host:deny_hosts")))
-        .map(|e| e.destination_host.as_str())
-        .collect();
-    let mut out = String::from(
-        "# Generated by `capyshield watch --emit-policy` from observed traffic. Review before committing:\n\
-         # hosts annotated with a preset can be replaced by `allow_presets: [name]`.\n\
-         version: 1\nmode: enforce\nfail_mode: fail_closed\negress:\n  allow_hosts:",
-    );
-    if hosts.is_empty() {
-        out += " []\n";
-    }
-    for h in hosts {
-        let presets: Vec<&str> = capyshield_policy::PRESETS
-            .iter()
-            .filter(|(_, hs)| hs.iter().any(|p| capyshield_policy::host_matches(p, h)))
-            .map(|(n, _)| n.as_str())
-            .collect();
-        let note = if presets.is_empty() {
-            String::new()
-        } else {
-            format!(" # preset: {}", presets.join(", "))
-        };
-        out += &format!("\n    - \"{h}\"{note}");
-    }
-    out.push('\n');
-    out
 }
 
 fn human_bytes(n: u64) -> String {
@@ -535,9 +560,7 @@ async fn vex(
     let project = if redact {
         capyshield_vex::redact(&name)
     } else {
-        name.chars()
-            .map(|c| if c.is_ascii_alphanumeric() || "-_.".contains(c) { c } else { '-' })
-            .collect()
+        project_slug(&repo)
     };
 
     let client = if sync && !dry_run {
@@ -557,14 +580,7 @@ async fn vex(
     };
 
     let items = capyshield_vex::evaluate(findings, &analysis, &local_rules, &cloud_rules);
-    let fmt = &time::format_description::well_known::Rfc3339;
-    let ts = std::env::var("SOURCE_DATE_EPOCH")
-        .ok()
-        .and_then(|s| s.parse().ok())
-        .and_then(|s| time::OffsetDateTime::from_unix_timestamp(s).ok())
-        .unwrap_or_else(time::OffsetDateTime::now_utc)
-        .format(fmt)
-        .unwrap();
+    let ts = now_rfc3339();
     let doc = capyshield_vex::openvex(&items, &author, &ts);
     let doc_text = serde_json::to_string_pretty(&doc).unwrap();
     match &output {
@@ -702,41 +718,4 @@ fn init(force: bool, no_ca: bool) -> Result<u8, String> {
         dir.display()
     );
     Ok(0)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn event(host: &str, action: Action, rule: Option<&str>) -> Event {
-        Event {
-            timestamp: String::new(),
-            destination_host: host.into(),
-            port: 443,
-            protocol: "https-sni",
-            bytes_sent: 0,
-            action,
-            rule_id: rule.map(String::from),
-            agent_id: None,
-        }
-    }
-
-    #[test]
-    fn emitted_policy_allows_seen_hosts_and_parses() {
-        let events = [
-            event("registry.npmjs.org", Action::Allowed, None),
-            event("registry.npmjs.org", Action::Allowed, None),
-            event("gitlab.com", Action::Allowed, None),
-            event("internal.example.com", Action::Audited, Some("secret_leak:env:TOKEN")),
-            event("webhook.site", Action::Audited, Some("disallowed_host:deny_hosts:webhook.site")),
-        ];
-        let yaml = policy_from_events(&events);
-        assert!(yaml.contains("\"registry.npmjs.org\" # preset: npm"));
-        assert!(yaml.contains("\"gitlab.com\" # preset: gitlab"));
-        assert!(!yaml.contains("webhook.site"), "deny-listed hosts are never suggested");
-        let cfg = Config::parse(&yaml).unwrap();
-        assert_eq!(cfg.mode, Mode::Enforce);
-        assert_eq!(cfg.egress.allow_hosts, ["gitlab.com", "internal.example.com", "registry.npmjs.org"]);
-        assert!(Config::parse(&policy_from_events(&[])).unwrap().egress.allow_hosts.is_empty());
-    }
 }

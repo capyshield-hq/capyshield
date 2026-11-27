@@ -160,7 +160,7 @@ Run `capyshield <command> --help` for the full text. The wrapped command always 
 | Command | Purpose | Options |
 |---|---|---|
 | `watch -- <cmd>` | Zero-config egress audit. Forces `mode: audit` and nothing is blocked. | `--config <file>` optional policy · `--tls sni\|mitm` · `--report <events.json>` · `--emit-policy <file>` writes an enforce-mode policy allowing exactly the hosts seen |
-| `guard -- <cmd>` | Enforce `capyshield.yaml` (default `./capyshield.yaml`; without one, enforces the built-in secret, ENV and PII checks). Exits 2 on blocked egress. | `--config <file>` · `--mode audit\|enforce\|enforce_fail_open\|enforce_fail_closed` · `--fail-mode fail_open\|fail_closed` · `--tls sni\|mitm` · `--agent-id <id>` · `--report <events.json>` |
+| `guard -- <cmd>` | Enforce `capyshield.yaml` (default `./capyshield.yaml`; without one, enforces the built-in secret, ENV and PII checks). Exits 2 on blocked egress. | `--config <file>` · `--mode audit\|enforce\|enforce_fail_open\|enforce_fail_closed` · `--fail-mode fail_open\|fail_closed` · `--tls sni\|mitm` · `--agent-id <id>` · `--report <events.json>` · `--sync` |
 | `vex --input <report.json>` | Triage a Trivy/Grype report by reachability and write OpenVEX v0.2.0 (to stdout unless `--output`). | `--scanner trivy\|grype` (auto-detected) · `--repo <dir>` (default `.`) · `--output <file>` · `--summary <file.md>` · `--fail-on high,critical` · `--redact-paths` · `--sync` · `--dry-run` · `--config <file>` · `--author <name>` (default `capyshield`) |
 | `init` | Write `capyshield.yaml`, `.capyshield/vex-rules.yaml`, and a local root CA in `~/.capyshield/` (key mode `0600`). Existing files are kept. | `--force` overwrites `capyshield.yaml` · `--no-ca` skips the CA |
 | `presets` | List the built-in host presets for `egress.allow_presets`. | none |
@@ -329,6 +329,14 @@ To build a tight allowlist, run your build once with `capyshield watch --emit-po
     capyshield vex --input trivy.json --repo . --output release.openvex.json --fail-on high,critical
 ```
 
+With a CapyShield Cloud Team plan, add `--sync` to use the team egress policy (unioned with `capyshield.yaml`) and report blocked hosts. `guard` reads the token itself and removes it from the wrapped command's environment, so `npm ci` and its install scripts never see it:
+
+```yaml
+- run: capyshield guard --config capyshield.yaml --sync -- npm ci
+  env:
+    CAPYSHIELD_TOKEN: ${{ secrets.CAPYSHIELD_TOKEN }}
+```
+
 ### AI coding agents & MCP servers
 
 ```bash
@@ -375,8 +383,8 @@ None are required. CapyShield runs fully offline by default.
 
 | Variable | Used by | Purpose |
 |---|---|---|
-| `CAPYSHIELD_TOKEN` (or `CAPYSHIELD_API_KEY`) | `vex --sync` | Authenticates to CapyShield Cloud. Sync is never attempted without `--sync`. |
-| `CAPYSHIELD_API_URL` | `vex --sync` | Overrides the API endpoint (default `https://api.capyshield.com`). |
+| `CAPYSHIELD_TOKEN` (or `CAPYSHIELD_API_KEY`) | `vex --sync`, `guard --sync` | Authenticates to CapyShield Cloud. Sync is never attempted without `--sync`. `watch` and `guard` always remove both from the wrapped command's environment, so install scripts and agents never see the token. |
+| `CAPYSHIELD_API_URL` | `vex --sync`, `guard --sync` | Overrides the API endpoint (default `https://api.capyshield.com`). |
 | `CAPYSHIELD_LOG` | all commands | Log filter for diagnostics on stderr, e.g. `debug` or `capyshield_proxy=debug` (default `warn`). |
 | `SOURCE_DATE_EPOCH` | `vex` | Fixes the OpenVEX timestamp for byte-for-byte reproducible output. |
 | `SSL_CERT_FILE` | `guard`/`watch` with `mitm` | If set, used as the base trust bundle that the local CA is appended to for the wrapped process. |
@@ -387,8 +395,8 @@ None are required. CapyShield runs fully offline by default.
 
 - **Zero source-code exfiltration.** Import analysis runs locally and keeps only package names and file counts.
 - **Secrets stay in memory.** ENV values are fingerprinted in process memory. Logs, reports and terminal output contain only variable names and rule ids.
-- **No telemetry.** CapyShield makes no network calls of its own unless you run `vex --sync` with `CAPYSHIELD_TOKEN` set.
-- **Small, inspectable sync payloads.** They contain vulnerability ids, purls, VEX statuses and reachability facts, capped at 500 KB. `--redact-paths` replaces file paths and the project name with deterministic `sha256:` hashes. `--dry-run` prints the exact payload without sending it.
+- **No telemetry.** CapyShield makes no network calls of its own unless you run `vex --sync` or `guard --sync` with `CAPYSHIELD_TOKEN` set.
+- **Small, inspectable sync payloads.** They contain vulnerability ids, purls, VEX statuses and reachability facts, capped at 500 KB. `--redact-paths` replaces file paths and the project name with deterministic `sha256:` hashes. `--dry-run` prints the exact payload without sending it. `guard --sync` sends only blocked `host`, `port`, `rule_id` and `count`, never payloads or ENV values.
 
 ## Performance
 

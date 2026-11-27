@@ -52,7 +52,7 @@ impl Ca {
         })
     }
 
-    pub(crate) fn leaf(&self, host: &str) -> Result<(CertificateDer<'static>, PrivateKeyDer<'static>), rcgen::Error> {
+    pub fn leaf(&self, host: &str) -> Result<(CertificateDer<'static>, PrivateKeyDer<'static>), rcgen::Error> {
         let mut p = CertificateParams::new(vec![host.to_string()])?;
         p.distinguished_name.push(DnType::CommonName, host);
         let now = OffsetDateTime::now_utc();

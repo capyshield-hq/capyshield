@@ -15,7 +15,7 @@ This document explains what happens inside `capyshield` when you run `watch`, `g
 
 ## Architecture
 
-The binary is a Cargo workspace of small, single-purpose crates. The CLI wires them together. Only `capyshield-sync` talks to the network on its own, and only with `vex --sync`.
+The binary is a Cargo workspace of small, single-purpose crates. The CLI wires them together. Only `capyshield-sync` talks to the network on its own, and only with `vex --sync` or `guard --sync`.
 
 ```mermaid
 flowchart TB
@@ -29,7 +29,7 @@ flowchart TB
 
     cli -->|watch / guard| proxy
     cli -->|vex| vex
-    cli -->|vex --sync| sync
+    cli -->|vex --sync / guard --sync| sync
     proxy --> scanner
     proxy --> policy
     scanner --> policy
@@ -227,6 +227,21 @@ sequenceDiagram
 ```
 
 The payload contains vulnerability ids, purls, statuses and reachability facts, never source code. With `--redact-paths`, file paths and the project name are replaced by deterministic `sha256:` hashes.
+
+```mermaid
+sequenceDiagram
+    participant G as capyshield guard --sync
+    participant A as CapyShield Cloud API
+    participant C as wrapped command
+
+    G->>A: GET /v1/egress/policy?project=…
+    A-->>G: Team allow_presets / allow_hosts / deny_hosts, unioned with capyshield.yaml
+    G->>C: Run with the proxy, CAPYSHIELD_TOKEN / CAPYSHIELD_API_KEY removed
+    C-->>G: Exit
+    G->>A: POST /v1/egress/report (blocked host, port, rule_id, count)
+```
+
+The team policy rejects unknown fields. If the pull or the report fails, `guard` warns and keeps enforcing the local policy; the exit code still reflects blocked egress.
 
 ## Exit codes
 
