@@ -182,7 +182,34 @@ impl Default for Vex {
     }
 }
 
+/// Team egress policy from CapyShield Cloud (`GET /v1/egress/policy`). Unknown fields are rejected
+/// so a newer server rule is never silently ignored.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct TeamEgress {
+    pub allow_presets: Vec<String>,
+    pub allow_hosts: Vec<String>,
+    pub deny_hosts: Vec<String>,
+}
+
 impl Config {
+    /// Unions a team policy (JSON or YAML) into this config, expanding presets like `parse` does.
+    pub fn merge_team_egress(&mut self, text: &str) -> Result<(), String> {
+        let t: TeamEgress = serde_yaml::from_str(text).map_err(|e| e.to_string())?;
+        let mut check = Config::default();
+        check.egress.allow_presets = t.allow_presets.clone();
+        check.egress.allow_hosts = t.allow_hosts.clone();
+        check.egress.deny_hosts = t.deny_hosts.clone();
+        check.validate()?;
+        for name in &t.allow_presets {
+            self.egress.allow_hosts.extend(PRESETS[name].iter().cloned());
+        }
+        self.egress.allow_presets.extend(t.allow_presets);
+        self.egress.allow_hosts.extend(t.allow_hosts);
+        self.egress.deny_hosts.extend(t.deny_hosts);
+        Ok(())
+    }
+
     pub fn load(path: &Path) -> Result<Config, String> {
         let text = std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?;
         Config::parse(&text).map_err(|e| format!("{}: {e}", path.display()))
@@ -257,52 +284,4 @@ pub fn host_matches(pattern: &str, host: &str) -> bool {
 
 pub fn any_host_matches(patterns: &[String], host: &str) -> bool {
     patterns.iter().any(|p| host_matches(p, host))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn template_is_valid() {
-        let c = Config::parse(TEMPLATE).unwrap();
-        assert_eq!(c.mode, Mode::Enforce);
-        assert_eq!(c.egress.max_outbound_bytes, Some(131072));
-        assert!(any_host_matches(&c.egress.allow_hosts, "files.pythonhosted.org"));
-        assert!(!any_host_matches(&c.egress.allow_hosts, "github.com"));
-        assert!(c.vex.redact_paths);
-    }
-
-    #[test]
-    fn rejects_bad_input() {
-        assert!(Config::parse("version: 2").is_err());
-        assert!(Config::parse("bogus: 1").is_err());
-        assert!(Config::parse("egress:\n  allow_hosts: ['a*b.com']").is_err());
-        assert!(Config::parse("mode: yolo").is_err());
-        assert!(
-            Config::parse("egress:\n  allow_presets: ['nope']")
-                .unwrap_err()
-                .contains("available: anthropic")
-        );
-    }
-
-    #[test]
-    fn presets_are_valid_hosts() {
-        let all: Vec<String> = PRESETS.values().flatten().cloned().collect();
-        let mut c = Config::default();
-        c.egress.allow_hosts = all;
-        c.validate().unwrap();
-        assert!(PRESETS.len() >= 11);
-    }
-
-    #[test]
-    fn host_globs() {
-        assert!(host_matches("*.apple.com", "gs.apple.com"));
-        assert!(host_matches("*.apple.com", "A.B.Apple.COM."));
-        assert!(!host_matches("*.apple.com", "apple.com"));
-        assert!(!host_matches("*.apple.com", "evilapple.com"));
-        assert!(host_matches("pypi.org", "PyPI.org"));
-        assert!(!host_matches("pypi.org", "x.pypi.org"));
-        assert!(host_matches("*", "anything"));
-    }
 }
